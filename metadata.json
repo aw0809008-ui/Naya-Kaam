@@ -1,0 +1,6 @@
+{
+  "name": "Eravault Vintage",
+  "description": "Manage your vintage inventory like a pro. Track every piece from sourcing to sale. Built for Fleek sellers.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
