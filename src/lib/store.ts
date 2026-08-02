@@ -2,6 +2,8 @@
 
 import { Worker, Category, Booking, Review, User, BookingStatus, CommissionStatus } from './types';
 import { INITIAL_CATEGORIES, INITIAL_WORKERS, INITIAL_REVIEWS, INITIAL_BOOKINGS } from './initial-data';
+import { db, handleFirestoreError, OperationType } from './firebase';
+import { doc, setDoc, deleteDoc, getDocs, collection } from 'firebase/firestore';
 
 const STORAGE_KEYS = {
   WORKERS: 'nayakaam_workers_v1',
@@ -66,6 +68,12 @@ export function saveCategory(category: Category): Category[] {
     updated = [category, ...current];
   }
   setStored(STORAGE_KEYS.CATEGORIES, updated);
+
+  // Firestore sync
+  setDoc(doc(db, 'categories', category.id), category).catch((err) => {
+    handleFirestoreError(err, OperationType.WRITE, `categories/${category.id}`);
+  });
+
   return updated;
 }
 
@@ -73,6 +81,11 @@ export function deleteCategory(id: string): Category[] {
   const current = getCategories();
   const updated = current.filter((c) => c.id !== id);
   setStored(STORAGE_KEYS.CATEGORIES, updated);
+
+  deleteDoc(doc(db, 'categories', id)).catch((err) => {
+    handleFirestoreError(err, OperationType.DELETE, `categories/${id}`);
+  });
+
   return updated;
 }
 
@@ -97,6 +110,12 @@ export function saveWorker(worker: Worker): Worker {
     updated = [worker, ...workers];
   }
   setStored(STORAGE_KEYS.WORKERS, updated);
+
+  // Firestore sync
+  setDoc(doc(db, 'workers', worker.id), worker).catch((err) => {
+    handleFirestoreError(err, OperationType.WRITE, `workers/${worker.id}`);
+  });
+
   return worker;
 }
 
@@ -106,6 +125,14 @@ export function toggleWorkerVerified(workerId: string): Worker[] {
     w.id === workerId ? { ...w, is_verified: !w.is_verified } : w
   );
   setStored(STORAGE_KEYS.WORKERS, updated);
+
+  const updatedWorker = updated.find((w) => w.id === workerId);
+  if (updatedWorker) {
+    setDoc(doc(db, 'workers', workerId), updatedWorker).catch((err) => {
+      handleFirestoreError(err, OperationType.UPDATE, `workers/${workerId}`);
+    });
+  }
+
   return updated;
 }
 
@@ -115,6 +142,14 @@ export function verifyWorkerCNIC(workerId: string, isVerified: boolean): Worker[
     w.id === workerId ? { ...w, is_verified: isVerified } : w
   );
   setStored(STORAGE_KEYS.WORKERS, updated);
+
+  const updatedWorker = updated.find((w) => w.id === workerId);
+  if (updatedWorker) {
+    setDoc(doc(db, 'workers', workerId), updatedWorker).catch((err) => {
+      handleFirestoreError(err, OperationType.UPDATE, `workers/${workerId}`);
+    });
+  }
+
   return updated;
 }
 
@@ -124,6 +159,14 @@ export function toggleWorkerSuspended(workerId: string): Worker[] {
     w.id === workerId ? { ...w, is_suspended: !w.is_suspended } : w
   );
   setStored(STORAGE_KEYS.WORKERS, updated);
+
+  const updatedWorker = updated.find((w) => w.id === workerId);
+  if (updatedWorker) {
+    setDoc(doc(db, 'workers', workerId), updatedWorker).catch((err) => {
+      handleFirestoreError(err, OperationType.UPDATE, `workers/${workerId}`);
+    });
+  }
+
   return updated;
 }
 
@@ -155,6 +198,12 @@ export function createBooking(data: Omit<Booking, 'id' | 'created_at' | 'status'
   };
   const updated = [newBooking, ...bookings];
   setStored(STORAGE_KEYS.BOOKINGS, updated);
+
+  // Firestore sync
+  setDoc(doc(db, 'bookings', newBooking.id), newBooking).catch((err) => {
+    handleFirestoreError(err, OperationType.CREATE, `bookings/${newBooking.id}`);
+  });
+
   return newBooking;
 }
 
@@ -171,6 +220,14 @@ export function updateBookingStatus(bookingId: string, status: BookingStatus): B
     return b;
   });
   setStored(STORAGE_KEYS.BOOKINGS, updated);
+
+  const updatedBooking = updated.find((b) => b.id === bookingId);
+  if (updatedBooking) {
+    setDoc(doc(db, 'bookings', bookingId), updatedBooking).catch((err) => {
+      handleFirestoreError(err, OperationType.UPDATE, `bookings/${bookingId}`);
+    });
+  }
+
   return updated;
 }
 
@@ -180,6 +237,14 @@ export function markCommissionPaid(bookingId: string): Booking[] {
     b.id === bookingId ? { ...b, commission_status: 'paid' as CommissionStatus } : b
   );
   setStored(STORAGE_KEYS.BOOKINGS, updated);
+
+  const updatedBooking = updated.find((b) => b.id === bookingId);
+  if (updatedBooking) {
+    setDoc(doc(db, 'bookings', bookingId), updatedBooking).catch((err) => {
+      handleFirestoreError(err, OperationType.UPDATE, `bookings/${bookingId}`);
+    });
+  }
+
   return updated;
 }
 
@@ -203,12 +268,23 @@ export function addReview(reviewData: Omit<Review, 'id' | 'created_at'>): Review
   const updatedReviews = [newReview, ...reviews];
   setStored(STORAGE_KEYS.REVIEWS, updatedReviews);
 
+  setDoc(doc(db, 'reviews', newReview.id), newReview).catch((err) => {
+    handleFirestoreError(err, OperationType.CREATE, `reviews/${newReview.id}`);
+  });
+
   // Mark booking as reviewed
   const bookings = getBookings();
   const updatedBookings = bookings.map((b) =>
     b.id === reviewData.booking_id ? { ...b, has_review: true } : b
   );
   setStored(STORAGE_KEYS.BOOKINGS, updatedBookings);
+
+  const updatedBooking = updatedBookings.find((b) => b.id === reviewData.booking_id);
+  if (updatedBooking) {
+    setDoc(doc(db, 'bookings', reviewData.booking_id), updatedBooking).catch((err) => {
+      handleFirestoreError(err, OperationType.UPDATE, `bookings/${reviewData.booking_id}`);
+    });
+  }
 
   // Recalculate Worker average_rating & total_reviews
   const workerReviews = updatedReviews.filter((r) => r.worker_id === reviewData.worker_id);
@@ -223,6 +299,13 @@ export function addReview(reviewData: Omit<Review, 'id' | 'created_at'>): Review
       : w
   );
   setStored(STORAGE_KEYS.WORKERS, updatedWorkers);
+
+  const updatedWorker = updatedWorkers.find((w) => w.id === reviewData.worker_id);
+  if (updatedWorker) {
+    setDoc(doc(db, 'workers', reviewData.worker_id), updatedWorker).catch((err) => {
+      handleFirestoreError(err, OperationType.UPDATE, `workers/${reviewData.worker_id}`);
+    });
+  }
 
   return newReview;
 }
@@ -243,3 +326,4 @@ export function getCurrentUser(): User | null {
 export function setCurrentUser(user: User | null): void {
   setStored(STORAGE_KEYS.CURRENT_USER, user);
 }
+

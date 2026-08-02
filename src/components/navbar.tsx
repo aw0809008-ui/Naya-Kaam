@@ -22,12 +22,8 @@ import { User as UserType } from '@/lib/types';
 export function Navbar() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [currentUser, setUserState] = useState<UserType | null>(null);
+  const [currentUser, setUserState] = useState<UserType | null>(() => getCurrentUser());
   const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
-
-  useEffect(() => {
-    setUserState(getCurrentUser());
-  }, []);
 
   const handleSwitchRole = (role: 'customer' | 'worker' | 'admin') => {
     setRoleDropdownOpen(false);
@@ -74,94 +70,73 @@ export function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-white border-b border-gray-100 shadow-xs">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+    <header className="sticky top-0 z-50 w-full bg-[#F7F8F5]/90 backdrop-blur-md border-b border-[#EAECE7]">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-[76px]">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-10 h-10 rounded-xl bg-[#1E5AA8] flex items-center justify-center text-white shadow-sm group-hover:bg-[#174786] transition-colors">
-              <Wrench size={22} className="stroke-[2.5]" />
+            <div className="w-9 h-9 rounded-xl bg-[#0B0E12] flex items-center justify-center -rotate-6 shadow-xs group-hover:rotate-0 transition-transform duration-200 shrink-0">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M14.7 6.3a1 1 0 0 0-1.4 0L4.6 15A2 2 0 0 0 4 16.4V19a1 1 0 0 0 1 1h2.6a2 2 0 0 0 1.4-.6l8.7-8.7a1 1 0 0 0 0-1.4l-3-3Z" stroke="#39E07A" strokeWidth="1.8" />
+              </svg>
             </div>
-            <div>
-              <span className="text-xl font-bold tracking-tight text-[#1E5AA8] block leading-none">
-                Naya Kaam
-              </span>
-              <span className="text-[10px] text-gray-500 tracking-wide font-medium block mt-0.5">
-                Mahir Kaarigar Marketplace
-              </span>
-            </div>
+            <span className="font-heading font-extrabold text-xl text-[#0B0E12] tracking-tight">
+              Naya Kaam
+            </span>
           </Link>
 
           {/* Desktop Nav Links */}
-          <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-700">
-            <Link
-              href="/search"
-              className={`hover:text-[#1E5AA8] transition-colors flex items-center gap-1.5 ${
-                pathname === '/search' ? 'text-[#1E5AA8] font-semibold' : ''
-              }`}
-            >
+          <nav className="hidden md:flex items-center gap-8 text-[15px] font-semibold text-[#0B0E12]">
+            <Link href="/search" className="hover:text-[#1FB863] transition-colors flex items-center gap-1.5">
               <Search size={16} />
-              Dhoondein (Search)
-            </Link>
-            <Link
-              href="/#categories"
-              className="hover:text-[#1E5AA8] transition-colors"
-            >
               Categories
             </Link>
-            <Link
-              href="/#how-it-works"
-              className="hover:text-[#1E5AA8] transition-colors"
-            >
-              Kaise Kaam Karta Hai
+            <Link href="/#how-it-works" className="hover:text-[#1FB863] transition-colors">
+              How it works
             </Link>
-            <Link
-              href="/worker-signup"
-              className="text-[#1E5AA8] hover:underline font-semibold flex items-center gap-1"
-            >
-              <Briefcase size={15} />
-              Kaarigar Banein
+            <Link href="/worker-signup" className="hover:text-[#1FB863] transition-colors flex items-center gap-1">
+              Become a worker
             </Link>
           </nav>
 
-          {/* Right Action & Role Switcher */}
+          {/* Right Action Buttons & Role Switcher */}
           <div className="hidden md:flex items-center gap-3">
             {/* Quick Demo Role Switcher */}
             <div className="relative">
               <button
                 onClick={() => setRoleDropdownOpen(!roleDropdownOpen)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-xs font-semibold text-gray-700 hover:bg-gray-100 transition"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#EAECE7] bg-white text-xs font-bold text-[#0B0E12] hover:bg-gray-50 transition"
               >
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span className="w-2 h-2 rounded-full bg-[#39E07A] animate-pulse"></span>
                 <span>Mode:</span>
-                <span className="capitalize text-[#1E5AA8]">
+                <span className="capitalize text-[#1FB863]">
                   {currentUser ? currentUser.role : 'Guest'}
                 </span>
-                <ChevronDown size={14} className="text-gray-400" />
+                <ChevronDown size={14} className="text-[#666E7A]" />
               </button>
 
               {roleDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-56 rounded-xl bg-white shadow-lg border border-gray-100 py-2 z-50 text-xs">
-                  <div className="px-3 py-1.5 border-b border-gray-100 text-gray-400 font-semibold uppercase tracking-wider text-[10px]">
+                <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-white shadow-xl border border-[#EAECE7] py-2 z-50 text-xs">
+                  <div className="px-3 py-1.5 border-b border-[#EAECE7] text-[#666E7A] font-bold uppercase tracking-wider text-[10px]">
                     Switch View (Demo)
                   </div>
                   <button
                     onClick={() => handleSwitchRole('customer')}
-                    className="w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center gap-2 text-gray-700"
+                    className="w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center gap-2 text-[#0B0E12] font-semibold transition"
                   >
-                    <User size={14} className="text-[#1E5AA8]" />
-                    <span>Customer Dashboard</span>
+                    <User size={14} className="text-[#1FB863]" />
+                    <span>Customer View</span>
                   </button>
                   <button
                     onClick={() => handleSwitchRole('worker')}
-                    className="w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center gap-2 text-gray-700"
+                    className="w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center gap-2 text-[#0B0E12] font-semibold transition"
                   >
                     <UserCheck size={14} className="text-emerald-600" />
-                    <span>Worker Dashboard</span>
+                    <span>Worker View</span>
                   </button>
                   <button
                     onClick={() => handleSwitchRole('admin')}
-                    className="w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center gap-2 text-gray-700"
+                    className="w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center gap-2 text-[#0B0E12] font-semibold transition"
                   >
                     <ShieldAlert size={14} className="text-amber-600" />
                     <span>Admin Panel</span>
@@ -174,13 +149,13 @@ export function Navbar() {
               <div className="flex items-center gap-2">
                 <Link
                   href={currentUser.role === 'admin' ? '/admin' : '/dashboard'}
-                  className="px-4 py-2 rounded-xl text-sm font-semibold text-white bg-[#1E5AA8] hover:bg-[#174786] transition shadow-xs"
+                  className="btn btn-primary text-xs py-2 px-4"
                 >
                   Dashboard
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="p-2 text-gray-500 hover:text-red-600 hover:bg-gray-100 rounded-lg transition"
+                  className="p-2 text-[#666E7A] hover:text-red-600 hover:bg-red-50 rounded-full transition"
                   title="Logout"
                 >
                   <LogOut size={18} />
@@ -190,15 +165,15 @@ export function Navbar() {
               <div className="flex items-center gap-2">
                 <Link
                   href="/login"
-                  className="px-4 py-2 text-sm font-semibold text-[#1E5AA8] border border-[#1E5AA8] hover:bg-[#1E5AA8]/5 rounded-xl transition"
+                  className="btn btn-ghost text-xs py-2 px-4 font-bold"
                 >
                   Login
                 </Link>
                 <Link
                   href="/signup"
-                  className="px-4 py-2 text-sm font-semibold text-white bg-[#F5820D] hover:bg-[#D97109] rounded-xl transition shadow-xs"
+                  className="btn btn-primary text-xs py-2 px-4 font-bold"
                 >
-                  Sign Up
+                  Sign up
                 </Link>
               </div>
             )}

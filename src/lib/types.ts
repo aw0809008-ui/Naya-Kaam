@@ -24,6 +24,7 @@ export interface Worker {
   cnic_back_url?: string;
   profile_photo_url: string;
   category: string;
+  skills?: string[];
   bio: string;
   trust_summary?: string;
   years_experience: number;

@@ -14,13 +14,10 @@ interface BookClientProps {
 
 export function BookClient({ workerId }: BookClientProps) {
   const router = useRouter();
-  const [worker, setWorker] = useState<Worker | null>(null);
-
-  useEffect(() => {
+  const [worker] = useState<Worker | null>(() => {
     initializeStore();
-    const w = getWorkerById(workerId);
-    if (w) setWorker(w);
-  }, [workerId]);
+    return getWorkerById(workerId) || null;
+  });
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FAFAFA]">

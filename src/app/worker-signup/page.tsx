@@ -127,19 +127,21 @@ export default function WorkerSignupPage() {
   const citiesList = ['Karachi', 'Lahore', 'Islamabad', 'Rawalpindi', 'Faisalabad'];
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAFAFA]">
+    <div className="min-h-screen flex flex-col bg-[#F7F8F5] text-[#0B0E12] font-body">
       <Navbar />
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full flex-1">
-        <div className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-100 card-shadow space-y-6">
-          <div className="text-center space-y-2 border-b border-gray-100 pb-6">
-            <div className="w-12 h-12 rounded-2xl bg-[#1E5AA8] text-white flex items-center justify-center mx-auto shadow-sm">
-              <Briefcase size={24} />
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full flex-1">
+        <div className="bg-white rounded-[26px] p-6 sm:p-10 border border-[#EAECE7] shadow-xl space-y-6">
+          <div className="text-center space-y-2 border-b border-[#EAECE7] pb-6">
+            <div className="w-12 h-12 rounded-2xl bg-[#0B0E12] text-[#39E07A] flex items-center justify-center mx-auto -rotate-6 shadow-sm">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <path d="M14.7 6.3a1 1 0 0 0-1.4 0L4.6 15A2 2 0 0 0 4 16.4V19a1 1 0 0 0 1 1h2.6a2 2 0 0 0 1.4-.6l8.7-8.7a1 1 0 0 0 0-1.4l-3-3Z" stroke="#39E07A" strokeWidth="2" />
+              </svg>
             </div>
-            <h1 className="text-2xl font-bold text-[#1A1A1A]">
+            <h1 className="font-heading font-extrabold text-2xl sm:text-3xl text-[#0B0E12] pt-2">
               Kaarigar Registration (Worker Signup)
             </h1>
-            <p className="text-xs text-[#4A4A4A] max-w-md mx-auto">
+            <p className="text-xs sm:text-sm text-[#666E7A] font-medium max-w-md mx-auto">
               Naya Kaam par verified provider banein. CNIC verify karwayen aur rozana naye customers se kaam hasil karein.
             </p>
           </div>
@@ -147,13 +149,13 @@ export default function WorkerSignupPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Personal Details */}
             <div className="space-y-4">
-              <h3 className="font-bold text-sm text-[#1E5AA8] uppercase tracking-wider flex items-center gap-1.5">
-                <User size={16} /> 1. Basic Details
+              <h3 className="font-heading font-extrabold text-sm text-[#0B0E12] uppercase tracking-wider flex items-center gap-1.5">
+                <User size={16} className="text-[#1FB863]" /> 1. Basic Details
               </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-[#1A1A1A] mb-1">
+                  <label className="block text-xs font-bold text-[#0B0E12] mb-1.5">
                     Poora Naam (Full Name) *
                   </label>
                   <input
@@ -162,12 +164,12 @@ export default function WorkerSignupPage() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. Mohammad Tariq"
-                    className="w-full p-2.5 text-xs rounded-xl border border-gray-200 focus:outline-hidden focus:border-[#1E5AA8]"
+                    className="w-full p-3 text-xs rounded-xl border border-[#EAECE7] focus:outline-none focus:border-[#0B0E12] font-medium text-[#0B0E12] bg-[#F7F8F5]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[#1A1A1A] mb-1">
+                  <label className="block text-xs font-bold text-[#0B0E12] mb-1.5">
                     Phone Number (Rabta Number) *
                   </label>
                   <input
@@ -176,20 +178,20 @@ export default function WorkerSignupPage() {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="e.g. 0300 1234567"
-                    className="w-full p-2.5 text-xs rounded-xl border border-gray-200 focus:outline-hidden focus:border-[#1E5AA8]"
+                    className="w-full p-3 text-xs rounded-xl border border-[#EAECE7] focus:outline-none focus:border-[#0B0E12] font-medium text-[#0B0E12] bg-[#F7F8F5]"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-[#1A1A1A] mb-1">
+                  <label className="block text-xs font-bold text-[#0B0E12] mb-1.5">
                     Shehar (City) *
                   </label>
                   <select
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
-                    className="w-full p-2.5 text-xs rounded-xl border border-gray-200 focus:outline-hidden focus:border-[#1E5AA8] bg-white"
+                    className="w-full p-3 text-xs rounded-xl border border-[#EAECE7] focus:outline-none focus:border-[#0B0E12] font-medium text-[#0B0E12] bg-[#F7F8F5]"
                   >
                     {citiesList.map((c) => (
                       <option key={c} value={c}>
@@ -200,7 +202,7 @@ export default function WorkerSignupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[#1A1A1A] mb-1">
+                  <label className="block text-xs font-bold text-[#0B0E12] mb-1.5">
                     Area / Neighborhood *
                   </label>
                   <input
@@ -209,27 +211,27 @@ export default function WorkerSignupPage() {
                     value={area}
                     onChange={(e) => setArea(e.target.value)}
                     placeholder="e.g. Gulshan-e-Iqbal, DHA, F-8"
-                    className="w-full p-2.5 text-xs rounded-xl border border-gray-200 focus:outline-hidden focus:border-[#1E5AA8]"
+                    className="w-full p-3 text-xs rounded-xl border border-[#EAECE7] focus:outline-none focus:border-[#0B0E12] font-medium text-[#0B0E12] bg-[#F7F8F5]"
                   />
                 </div>
               </div>
             </div>
 
             {/* Skill & Pricing */}
-            <div className="space-y-4 pt-4 border-t border-gray-100">
-              <h3 className="font-bold text-sm text-[#1E5AA8] uppercase tracking-wider flex items-center gap-1.5">
-                <Briefcase size={16} /> 2. Service Skill & Rates
+            <div className="space-y-4 pt-4 border-t border-[#EAECE7]">
+              <h3 className="font-heading font-extrabold text-sm text-[#0B0E12] uppercase tracking-wider flex items-center gap-1.5">
+                <Briefcase size={16} className="text-[#1FB863]" /> 2. Service Skill & Rates
               </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-[#1A1A1A] mb-1">
+                  <label className="block text-xs font-bold text-[#0B0E12] mb-1.5">
                     Primary Service Category *
                   </label>
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full p-2.5 text-xs rounded-xl border border-gray-200 focus:outline-hidden focus:border-[#1E5AA8] bg-white"
+                    className="w-full p-3 text-xs rounded-xl border border-[#EAECE7] focus:outline-none focus:border-[#0B0E12] font-medium text-[#0B0E12] bg-[#F7F8F5]"
                   >
                     {categories.map((cat) => (
                       <option key={cat.id} value={cat.name}>
@@ -240,7 +242,7 @@ export default function WorkerSignupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[#1A1A1A] mb-1">
+                  <label className="block text-xs font-bold text-[#0B0E12] mb-1.5">
                     Experience (Kitne saal ka tajurba?) *
                   </label>
                   <input
@@ -249,20 +251,20 @@ export default function WorkerSignupPage() {
                     max={40}
                     value={experience}
                     onChange={(e) => setExperience(Number(e.target.value))}
-                    className="w-full p-2.5 text-xs rounded-xl border border-gray-200 focus:outline-hidden focus:border-[#1E5AA8]"
+                    className="w-full p-3 text-xs rounded-xl border border-[#EAECE7] focus:outline-none focus:border-[#0B0E12] font-medium text-[#0B0E12] bg-[#F7F8F5]"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-[#1A1A1A] mb-1">
+                  <label className="block text-xs font-bold text-[#0B0E12] mb-1.5">
                     Pricing Type *
                   </label>
                   <select
                     value={rateType}
                     onChange={(e) => setRateType(e.target.value as any)}
-                    className="w-full p-2.5 text-xs rounded-xl border border-gray-200 focus:outline-hidden focus:border-[#1E5AA8] bg-white"
+                    className="w-full p-3 text-xs rounded-xl border border-[#EAECE7] focus:outline-none focus:border-[#0B0E12] font-medium text-[#0B0E12] bg-[#F7F8F5]"
                   >
                     <option value="hourly">Per Hour (Ghante k hisab se)</option>
                     <option value="job">Per Job (Kaam k hisab se)</option>
@@ -270,7 +272,7 @@ export default function WorkerSignupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[#1A1A1A] mb-1">
+                  <label className="block text-xs font-bold text-[#0B0E12] mb-1.5">
                     Rate Amount (PKR) *
                   </label>
                   <input
@@ -279,20 +281,20 @@ export default function WorkerSignupPage() {
                     step={100}
                     value={rateAmount}
                     onChange={(e) => setRateAmount(Number(e.target.value))}
-                    className="w-full p-2.5 text-xs rounded-xl border border-gray-200 focus:outline-hidden focus:border-[#1E5AA8]"
+                    className="w-full p-3 text-xs rounded-xl border border-[#EAECE7] focus:outline-none focus:border-[#0B0E12] font-medium text-[#0B0E12] bg-[#F7F8F5]"
                   />
                 </div>
               </div>
             </div>
 
             {/* CNIC Verification Upload */}
-            <div className="space-y-4 pt-4 border-t border-gray-100">
-              <h3 className="font-bold text-sm text-[#1E5AA8] uppercase tracking-wider flex items-center gap-1.5">
-                <ShieldCheck size={16} /> 3. NADRA CNIC Verification
+            <div className="space-y-4 pt-4 border-t border-[#EAECE7]">
+              <h3 className="font-heading font-extrabold text-sm text-[#0B0E12] uppercase tracking-wider flex items-center gap-1.5">
+                <ShieldCheck size={16} className="text-[#1FB863]" /> 3. NADRA CNIC Verification
               </h3>
 
               <div>
-                <label className="block text-xs font-bold text-[#1A1A1A] mb-1">
+                <label className="block text-xs font-bold text-[#0B0E12] mb-1.5">
                   CNIC Number (42101-XXXXXXX-X) *
                 </label>
                 <input
@@ -301,17 +303,17 @@ export default function WorkerSignupPage() {
                   value={cnicNumber}
                   onChange={(e) => setCnicNumber(e.target.value)}
                   placeholder="e.g. 42101-1234567-1"
-                  className="w-full p-2.5 text-xs rounded-xl border border-gray-200 focus:outline-hidden focus:border-[#1E5AA8]"
+                  className="w-full p-3 text-xs rounded-xl border border-[#EAECE7] focus:outline-none focus:border-[#0B0E12] font-medium text-[#0B0E12] bg-[#F7F8F5]"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-4 border-2 border-dashed border-gray-200 rounded-xl text-center hover:border-[#1E5AA8] transition cursor-pointer">
-                  <Upload size={20} className="text-gray-400 mx-auto mb-1" />
-                  <span className="text-xs font-semibold text-[#1A1A1A] block">
+                <div className="p-4 border-2 border-dashed border-[#EAECE7] bg-[#F7F8F5] rounded-2xl text-center hover:border-[#0B0E12] transition cursor-pointer">
+                  <Upload size={20} className="text-[#666E7A] mx-auto mb-1" />
+                  <span className="text-xs font-bold text-[#0B0E12] block">
                     Upload Front CNIC Photo
                   </span>
-                  <span className="text-[10px] text-gray-400">JPG or PNG (Max 5MB)</span>
+                  <span className="text-[10px] text-[#666E7A] font-medium">JPG or PNG (Max 5MB)</span>
                   <input
                     type="file"
                     accept="image/*"
@@ -319,24 +321,24 @@ export default function WorkerSignupPage() {
                     className="hidden"
                     id="cnic-front"
                   />
-                  <label htmlFor="cnic-front" className="block text-[11px] text-[#1E5AA8] font-bold mt-1 cursor-pointer">
+                  <label htmlFor="cnic-front" className="block text-[11px] text-[#1FB863] font-bold mt-1 cursor-pointer">
                     {cnicPhotoUploaded ? '✓ Photo Attached' : 'Select File'}
                   </label>
                 </div>
 
-                <div className="p-4 border-2 border-dashed border-gray-200 rounded-xl text-center hover:border-[#1E5AA8] transition cursor-pointer">
-                  <Upload size={20} className="text-gray-400 mx-auto mb-1" />
-                  <span className="text-xs font-semibold text-[#1A1A1A] block">
+                <div className="p-4 border-2 border-dashed border-[#EAECE7] bg-[#F7F8F5] rounded-2xl text-center hover:border-[#0B0E12] transition cursor-pointer">
+                  <Upload size={20} className="text-[#666E7A] mx-auto mb-1" />
+                  <span className="text-xs font-bold text-[#0B0E12] block">
                     Upload Back CNIC Photo
                   </span>
-                  <span className="text-[10px] text-gray-400">JPG or PNG (Max 5MB)</span>
+                  <span className="text-[10px] text-[#666E7A] font-medium">JPG or PNG (Max 5MB)</span>
                   <input
                     type="file"
                     accept="image/*"
                     className="hidden"
                     id="cnic-back"
                   />
-                  <label htmlFor="cnic-back" className="block text-[11px] text-[#1E5AA8] font-bold mt-1 cursor-pointer">
+                  <label htmlFor="cnic-back" className="block text-[11px] text-[#1FB863] font-bold mt-1 cursor-pointer">
                     Select File
                   </label>
                 </div>
@@ -344,19 +346,19 @@ export default function WorkerSignupPage() {
             </div>
 
             {/* AI Bio Generator Box */}
-            <div className="space-y-3 pt-4 border-t border-gray-100">
+            <div className="space-y-3 pt-4 border-t border-[#EAECE7]">
               <div className="flex items-center justify-between">
-                <label className="block text-xs font-bold text-[#1A1A1A]">
+                <label className="block text-xs font-bold text-[#0B0E12]">
                   Professional Bio (About Your Experience)
                 </label>
                 <button
                   type="button"
                   onClick={handleGenerateBio}
                   disabled={isGeneratingBio}
-                  className="px-3 py-1 rounded-lg bg-[#1E5AA8]/10 text-[#1E5AA8] hover:bg-[#1E5AA8]/20 text-xs font-bold flex items-center gap-1.5 transition border border-[#1E5AA8]/20"
+                  className="px-3 py-1.5 rounded-full bg-[#D6F5E3] text-[#1FB863] hover:bg-[#c3f2d4] text-xs font-bold flex items-center gap-1.5 transition border border-[#1FB863]/20"
                 >
                   {isGeneratingBio ? (
-                    <Loader2 size={13} className="animate-spin text-[#1E5AA8]" />
+                    <Loader2 size={13} className="animate-spin text-[#1FB863]" />
                   ) : (
                     <Sparkles size={13} />
                   )}
@@ -369,14 +371,14 @@ export default function WorkerSignupPage() {
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
                 placeholder="Click 'Generate Bio with AI' to let Gemini write an impressive summary, or type manually..."
-                className="w-full p-3 text-xs rounded-xl border border-gray-200 focus:outline-hidden focus:border-[#1E5AA8]"
+                className="w-full p-3 text-xs rounded-xl border border-[#EAECE7] focus:outline-none focus:border-[#0B0E12] font-medium text-[#0B0E12] bg-[#F7F8F5]"
               />
             </div>
 
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3.5 rounded-xl bg-[#F5820D] hover:bg-[#D97109] text-white font-bold text-sm transition shadow-md flex items-center justify-center gap-2"
+              className="btn btn-lime w-full py-4 text-xs font-extrabold"
             >
               {isSubmitting ? 'Registering Provider...' : 'Submit Provider Registration'}
               <ArrowRight size={18} />

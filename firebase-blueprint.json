@@ -1,0 +1,99 @@
+{
+  "entities": {
+    "Worker": {
+      "title": "Worker",
+      "description": "Skilled worker profile registered on Naya Kaam",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string", "maxLength": 100 },
+        "phone": { "type": "string", "maxLength": 20 },
+        "cnic_number": { "type": "string", "maxLength": 20 },
+        "category": { "type": "string", "maxLength": 50 },
+        "bio": { "type": "string", "maxLength": 1000 },
+        "trust_summary": { "type": "string", "maxLength": 1000 },
+        "years_experience": { "type": "number" },
+        "rate_type": { "type": "string", "enum": ["hourly", "per-job", "job"] },
+        "rate_amount": { "type": "number" },
+        "city": { "type": "string", "maxLength": 50 },
+        "area": { "type": "string", "maxLength": 50 },
+        "is_verified": { "type": "boolean" },
+        "is_available": { "type": "boolean" },
+        "average_rating": { "type": "number" },
+        "total_reviews": { "type": "number" },
+        "created_at": { "type": "string" }
+      },
+      "required": ["name", "phone", "category", "rate_amount", "city", "area"]
+    },
+    "Booking": {
+      "title": "Booking",
+      "description": "Service request booking between customer and worker",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "customer_id": { "type": "string" },
+        "customer_name": { "type": "string", "maxLength": 100 },
+        "customer_phone": { "type": "string", "maxLength": 20 },
+        "worker_id": { "type": "string" },
+        "worker_name": { "type": "string", "maxLength": 100 },
+        "category": { "type": "string", "maxLength": 50 },
+        "date_needed": { "type": "string", "maxLength": 50 },
+        "time_preference": { "type": "string", "maxLength": 50 },
+        "address": { "type": "string", "maxLength": 300 },
+        "description": { "type": "string", "maxLength": 1000 },
+        "status": { "type": "string", "enum": ["pending", "accepted", "completed", "cancelled"] },
+        "booking_amount": { "type": "number" },
+        "commission_amount": { "type": "number" },
+        "commission_status": { "type": "string", "enum": ["pending", "paid"] },
+        "created_at": { "type": "string" }
+      },
+      "required": ["customer_name", "customer_phone", "worker_id", "worker_name", "category", "date_needed", "address", "description"]
+    },
+    "Review": {
+      "title": "Review",
+      "description": "Customer rating and comment for completed booking",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "booking_id": { "type": "string" },
+        "customer_id": { "type": "string" },
+        "customer_name": { "type": "string", "maxLength": 100 },
+        "worker_id": { "type": "string" },
+        "rating": { "type": "number" },
+        "comment": { "type": "string", "maxLength": 1000 },
+        "created_at": { "type": "string" }
+      },
+      "required": ["booking_id", "customer_name", "worker_id", "rating", "comment"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "Service category",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string", "maxLength": 50 },
+        "icon_name": { "type": "string", "maxLength": 50 },
+        "description": { "type": "string", "maxLength": 200 }
+      },
+      "required": ["name", "icon_name"]
+    }
+  },
+  "firestore": {
+    "/workers/{workerId}": {
+      "schema": { "$ref": "#/entities/Worker" },
+      "description": "Registered skilled worker profiles"
+    },
+    "/bookings/{bookingId}": {
+      "schema": { "$ref": "#/entities/Booking" },
+      "description": "Service request bookings"
+    },
+    "/reviews/{reviewId}": {
+      "schema": { "$ref": "#/entities/Review" },
+      "description": "Customer reviews for completed bookings"
+    },
+    "/categories/{categoryId}": {
+      "schema": { "$ref": "#/entities/Category" },
+      "description": "Service category directory"
+    }
+  }
+}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
 import { CategoryIcon } from '@/components/category-icon';
@@ -15,21 +16,20 @@ import {
   Sparkles,
   ShieldCheck,
   CheckCircle2,
-  DollarSign,
-  Star,
-  Users,
-  Briefcase,
   ArrowRight,
+  Star,
   MapPin,
   Clock,
-  ThumbsUp,
+  Briefcase,
+  ChevronRight,
+  Zap,
 } from 'lucide-react';
 
 export default function HomePage() {
-  const router = Router();
+  const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
   const [featuredWorkers, setFeaturedWorkers] = useState<Worker[]>([]);
-  const [searchCategory, setSearchCategory] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [searchCity, setSearchCity] = useState('');
 
   const [isSmartSearchOpen, setIsSmartSearchOpen] = useState(false);
@@ -37,15 +37,19 @@ export default function HomePage() {
 
   useEffect(() => {
     initializeStore();
-    setCategories(getCategories());
-    const workers = getWorkers();
-    setFeaturedWorkers(workers.filter((w) => w.is_verified).slice(0, 6));
+    const loadedCats = getCategories();
+    const loadedWorkers = getWorkers().filter((w) => w.is_verified).slice(0, 6);
+    
+    Promise.resolve().then(() => {
+      setCategories(loadedCats);
+      setFeaturedWorkers(loadedWorkers);
+    });
   }, []);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const queryParams = new URLSearchParams();
-    if (searchCategory) queryParams.set('category', searchCategory);
+    if (searchQuery) queryParams.set('q', searchQuery);
     if (searchCity) queryParams.set('city', searchCity);
     router.push(`/search?${queryParams.toString()}`);
   };
@@ -58,214 +62,313 @@ export default function HomePage() {
     router.push(`/search?${queryParams.toString()}`);
   };
 
-  const cities = ['Karachi', 'Lahore', 'Islamabad', 'Rawalpindi', 'Faisalabad'];
+  // Preset Pastel colors matching the design system snippet
+  const categoryBgColors = [
+    { bg: '#D6F5E3', text: '#1FB863' },
+    { bg: '#DCE4FF', text: '#3D5AFE' },
+    { bg: '#FFE3EC', text: '#FF5F82' },
+    { bg: '#FFF3D1', text: '#C99A00' },
+    { bg: '#E4E1FF', text: '#6C4CF0' },
+    { bg: '#FFE0D6', text: '#E0631F' },
+    { bg: '#D1F0F5', text: '#1FA5B8' },
+    { bg: '#F0E4FF', text: '#8B4CF0' },
+    { bg: '#E0FFEA', text: '#1FB863' },
+    { bg: '#FFEBD1', text: '#E0951F' },
+  ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAFAFA]">
+    <div className="min-h-screen flex flex-col bg-[#F7F8F5] text-[#0B0E12] font-body selection:bg-[#39E07A] selection:text-[#0B0E12]">
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-b from-[#1E5AA8]/5 via-[#1E5AA8]/10 to-[#FAFAFA] pt-12 pb-20 px-4 sm:px-6 lg:px-8 border-b border-gray-100">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#1E5AA8]/10 text-[#1E5AA8] text-xs font-semibold mb-6 border border-[#1E5AA8]/20">
-            <ShieldCheck size={16} className="text-[#1E5AA8]" />
-            <span>Pakistan&apos;s 100% CNIC Verified Skilled Worker Marketplace</span>
-          </div>
+      <section className="relative pt-12 pb-20 overflow-hidden">
+        {/* Decorative Background Blobs */}
+        <div className="absolute top-10 right-10 w-96 h-96 rounded-full bg-[#39E07A] opacity-20 blur-3xl pointer-events-none -z-10" />
+        <div className="absolute bottom-10 left-10 w-96 h-96 rounded-full bg-[#FF5F82] opacity-15 blur-3xl pointer-events-none -z-10" />
 
-          <h1 className="text-3xl sm:text-5xl font-extrabold text-[#1A1A1A] tracking-tight leading-tight mb-4">
-            Ghar baithe, <span className="text-[#1E5AA8]">mahir kaarigar</span> dhoondein
-          </h1>
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          
+          {/* Hero Content Left */}
+          <div className="lg:col-span-7 space-y-6">
+            <div className="inline-block bg-[#FFC93C] text-[#0B0E12] font-bold text-xs px-3.5 py-1.5 rounded-full">
+              🔥 2,400+ online right now
+            </div>
 
-          <p className="text-base sm:text-lg text-[#4A4A4A] max-w-2xl mx-auto mb-8 font-normal leading-relaxed">
-            Electricians, plumbers, tailors, tutors, AC repair, drivers aur home cooks. CNIC verified ratings aur transparent rates k saath.
-          </p>
+            <h1 className="text-4xl sm:text-5xl lg:text-[56px] font-heading font-extrabold text-[#0B0E12] leading-[1.1] tracking-tight">
+              Ghar ka kaam?<br />
+              Ab <span className="hl-highlight">2 minute</span> mein book.
+            </h1>
 
-          {/* Search Bar Card */}
-          <div className="bg-white rounded-2xl p-4 sm:p-5 card-shadow max-w-3xl mx-auto border border-gray-100">
-            <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
-              {/* Category selector */}
-              <div className="sm:col-span-5 relative">
-                <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider text-left mb-1 pl-1">
-                  What Service? (Kaam)
-                </label>
-                <div className="relative">
-                  <select
-                    value={searchCategory}
-                    onChange={(e) => setSearchCategory(e.target.value)}
-                    className="w-full px-3.5 py-3 text-sm rounded-xl border border-gray-200 focus:outline-hidden focus:border-[#1E5AA8] bg-gray-50/50 text-[#1A1A1A] font-medium appearance-none"
-                  >
-                    <option value="">All Services (Sab Categories)</option>
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.name}>
-                        {cat.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+            <p className="text-base sm:text-lg text-[#666E7A] font-medium leading-relaxed max-w-xl">
+              Electrician, plumber, tailor, tutor — jo bhi chahiye, verified kaarigar dhoondein aur seedha app se book karein.
+            </p>
+
+            {/* Search Pill */}
+            <form onSubmit={handleSearchSubmit} className="search-pill max-w-xl">
+              <div className="flex items-center gap-2 pl-3 flex-1">
+                <Search size={20} className="text-[#666E7A] shrink-0" />
+                <input
+                  type="text"
+                  placeholder="Kaam ya area likhein... e.g. Electrician Gulshan"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-transparent text-sm font-medium focus:outline-none placeholder:text-[#666E7A]"
+                />
               </div>
-
-              {/* City selector */}
-              <div className="sm:col-span-4 relative">
-                <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider text-left mb-1 pl-1">
-                  Which Area/City? (Shehar)
-                </label>
-                <div className="relative">
-                  <select
-                    value={searchCity}
-                    onChange={(e) => setSearchCity(e.target.value)}
-                    className="w-full px-3.5 py-3 text-sm rounded-xl border border-gray-200 focus:outline-hidden focus:border-[#1E5AA8] bg-gray-50/50 text-[#1A1A1A] font-medium appearance-none"
-                  >
-                    <option value="">All Cities (Tamam Shehar)</option>
-                    {cities.map((city) => (
-                      <option key={city} value={city}>
-                        {city}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Search CTA */}
-              <div className="sm:col-span-3 flex flex-col justify-end">
-                <span className="hidden sm:block text-[11px] opacity-0 mb-1">&nbsp;</span>
-                <button
-                  type="submit"
-                  className="w-full py-3 px-4 rounded-xl bg-[#F5820D] hover:bg-[#D97109] text-white font-bold text-sm transition shadow-md flex items-center justify-center gap-2 group"
-                >
-                  <Search size={18} />
-                  <span>Search</span>
-                </button>
-              </div>
+              <button type="submit" className="btn btn-lime shrink-0">
+                Search →
+              </button>
             </form>
 
-            {/* Smart Search Trigger Option */}
-            <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs">
-              <span className="text-gray-500">Urdu / English mein type karna chahte hain?</span>
+            {/* AI Search Assistant Trigger */}
+            <div className="pt-1 flex items-center gap-2 text-xs">
+              <span className="text-[#666E7A] font-medium">Mushkil lag raha hai?</span>
               <button
                 type="button"
                 onClick={() => setIsSmartSearchOpen(true)}
-                className="inline-flex items-center gap-1.5 text-[#1E5AA8] font-bold hover:underline bg-[#1E5AA8]/5 px-3 py-1 rounded-lg border border-[#1E5AA8]/20 transition"
+                className="inline-flex items-center gap-1.5 text-[#0B0E12] font-bold hover:underline bg-[#D6F5E3] px-3 py-1 rounded-full text-xs transition"
               >
-                <Sparkles size={14} className="text-[#1E5AA8]" />
-                <span>AI Smart Search Try Karein</span>
+                <Sparkles size={13} className="text-[#1FB863]" />
+                <span>AI Urdu Voice/Text Assistant</span>
               </button>
             </div>
+
+            {/* Stat Row */}
+            <div className="pt-6 grid grid-cols-3 gap-6 max-w-md border-t border-[#EAECE7]">
+              <div>
+                <div className="font-heading font-extrabold text-2xl text-[#0B0E12]">2,400+</div>
+                <div className="text-[10px] font-bold uppercase tracking-wider text-[#666E7A] mt-0.5">VERIFIED WORKERS</div>
+              </div>
+              <div>
+                <div className="font-heading font-extrabold text-2xl text-[#0B0E12]">15,000+</div>
+                <div className="text-[10px] font-bold uppercase tracking-wider text-[#666E7A] mt-0.5">JOBS DONE</div>
+              </div>
+              <div>
+                <div className="font-heading font-extrabold text-2xl text-[#0B0E12]">4.8 ★</div>
+                <div className="text-[10px] font-bold uppercase tracking-wider text-[#666E7A] mt-0.5">AVG RATING</div>
+              </div>
+            </div>
           </div>
+
+          {/* Hero Visual Right: Phone Mockup with Floating Badges */}
+          <div className="lg:col-span-5 hidden lg:block relative py-6">
+            {/* Float Badge 1 (Top Left) */}
+            <div className="float-badge -top-2 -left-6 rotate-[-3deg]">
+              <div className="w-9 h-9 rounded-xl bg-[#D6F5E3] flex items-center justify-center text-[#1FB863] font-bold text-base">
+                ✓
+              </div>
+              <div>
+                <div className="font-heading font-bold text-xs text-[#0B0E12]">Verified CNIC</div>
+                <div className="text-[10px] text-[#666E7A] font-medium">100% Checked</div>
+              </div>
+            </div>
+
+            {/* Float Badge 2 (Bottom Right) */}
+            <div className="float-badge -bottom-2 -right-4 rotate-[2deg]">
+              <div className="w-9 h-9 rounded-xl bg-[#FFF3D1] flex items-center justify-center text-[#C99A00] font-bold text-base">
+                ★
+              </div>
+              <div>
+                <div className="font-heading font-bold text-xs text-[#0B0E12]">4.9 Rating</div>
+                <div className="text-[10px] text-[#666E7A] font-medium">120+ reviews</div>
+              </div>
+            </div>
+
+            {/* Phone Shell */}
+            <div className="w-[310px] mx-auto bg-[#0B0E12] rounded-[44px] p-3.5 shadow-2xl rotate-[3deg] hover:rotate-0 transition-transform duration-300 border-4 border-[#0B0E12]">
+              {/* Phone Inner Screen */}
+              <div className="bg-[#F7F8F5] rounded-[36px] p-4 space-y-3.5 overflow-hidden border border-gray-200">
+                {/* Mock Header */}
+                <div className="flex items-center justify-between pb-2 border-b border-[#EAECE7]">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#39E07A] animate-pulse" />
+                    <span className="font-heading font-bold text-xs text-[#0B0E12]">Available Near You</span>
+                  </div>
+                  <span className="text-[10px] text-[#666E7A] font-bold">Karachi</span>
+                </div>
+
+                {/* Card 1 */}
+                <div className="bg-white rounded-2xl p-3 border border-[#EAECE7] shadow-xs flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-10 h-10 rounded-xl bg-gray-200 overflow-hidden relative shrink-0">
+                      <Image
+                        src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120"
+                        alt="Worker"
+                        fill
+                        className="object-cover"
+                        referrerPolicy="no-referrer"
+                      />
+                    </div>
+                    <div>
+                      <div className="font-heading font-bold text-xs text-[#0B0E12] flex items-center gap-1">
+                        Imran Khan <CheckCircle2 size={12} className="text-[#1FB863]" />
+                      </div>
+                      <div className="text-[10px] text-[#666E7A]">Electrician • Gulshan</div>
+                      <div className="text-[10px] text-[#C99A00] font-bold">★ 4.9 (48)</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-heading font-bold text-xs text-[#0B0E12]">Rs. 500</div>
+                    <span className="text-[9px] bg-[#D6F5E3] text-[#1FB863] font-bold px-1.5 py-0.5 rounded-full">Available</span>
+                  </div>
+                </div>
+
+                {/* Card 2 */}
+                <div className="bg-white rounded-2xl p-3 border border-[#EAECE7] shadow-xs flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-10 h-10 rounded-xl bg-gray-200 overflow-hidden relative shrink-0">
+                      <Image
+                        src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120"
+                        alt="Worker"
+                        fill
+                        className="object-cover"
+                        referrerPolicy="no-referrer"
+                      />
+                    </div>
+                    <div>
+                      <div className="font-heading font-bold text-xs text-[#0B0E12] flex items-center gap-1">
+                        Zubair Ahmed <CheckCircle2 size={12} className="text-[#1FB863]" />
+                      </div>
+                      <div className="text-[10px] text-[#666E7A]">Master Plumber • Johar</div>
+                      <div className="text-[10px] text-[#C99A00] font-bold">★ 4.8 (32)</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-heading font-bold text-xs text-[#0B0E12]">Rs. 600</div>
+                    <span className="text-[9px] bg-[#D6F5E3] text-[#1FB863] font-bold px-1.5 py-0.5 rounded-full">Available</span>
+                  </div>
+                </div>
+
+                {/* Card 3 */}
+                <div className="bg-white rounded-2xl p-3 border border-[#EAECE7] shadow-xs flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-10 h-10 rounded-xl bg-gray-200 overflow-hidden relative shrink-0">
+                      <Image
+                        src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=120"
+                        alt="Worker"
+                        fill
+                        className="object-cover"
+                        referrerPolicy="no-referrer"
+                      />
+                    </div>
+                    <div>
+                      <div className="font-heading font-bold text-xs text-[#0B0E12] flex items-center gap-1">
+                        Salman Raza <CheckCircle2 size={12} className="text-[#1FB863]" />
+                      </div>
+                      <div className="text-[10px] text-[#666E7A]">AC Technician • Clifton</div>
+                      <div className="text-[10px] text-[#C99A00] font-bold">★ 5.0 (65)</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-heading font-bold text-xs text-[#0B0E12]">Rs. 1,000</div>
+                    <span className="text-[9px] bg-[#D6F5E3] text-[#1FB863] font-bold px-1.5 py-0.5 rounded-full">Available</span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
         </div>
       </section>
 
-      {/* Grid of Categories Section */}
-      <section id="categories" className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-        <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-8 gap-4">
-          <div>
-            <span className="text-xs font-bold text-[#1E5AA8] uppercase tracking-wider block">
-              Service Categories
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#1A1A1A]">
-              Kyun Na Aaj Hi Koi Kaam Karwayen?
-            </h2>
-          </div>
-          <button
-            onClick={() => router.push('/search')}
-            className="text-xs font-bold text-[#1E5AA8] hover:underline flex items-center gap-1"
-          >
-            Tamam Categories Dekhein <ArrowRight size={14} />
-          </button>
+      {/* Categories Grid */}
+      <section id="categories" className="py-16 px-4 sm:px-6 lg:px-8 max-w-[1200px] mx-auto w-full">
+        <div className="mb-8">
+          <div className="tag-label">CATEGORIES</div>
+          <h2 className="text-2xl sm:text-3xl font-heading font-extrabold text-[#0B0E12]">
+            Har kaam ke liye, koi na koi mahir
+          </h2>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {categories.slice(0, 11).map((category) => (
-            <button
-              key={category.id}
-              onClick={() => router.push(`/search?category=${encodeURIComponent(category.name)}`)}
-              className="bg-white rounded-2xl p-4 border border-gray-100 card-shadow card-shadow-hover flex flex-col items-center text-center group transition"
-            >
-              <div className="w-12 h-12 rounded-xl bg-[#1E5AA8]/10 text-[#1E5AA8] flex items-center justify-center mb-3 group-hover:bg-[#1E5AA8] group-hover:text-white transition-colors">
-                <CategoryIcon name={category.icon_name || category.name} size={24} />
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+          {categories.slice(0, 10).map((category, idx) => {
+            const theme = categoryBgColors[idx % categoryBgColors.length];
+            return (
+              <div
+                key={category.id}
+                onClick={() => router.push(`/search?category=${encodeURIComponent(category.name)}`)}
+                style={{ backgroundColor: theme.bg }}
+                className="cat-card group"
+              >
+                <div
+                  style={{ color: theme.text }}
+                  className="w-12 h-12 rounded-2xl bg-white/80 flex items-center justify-center mb-4 text-xl shadow-xs group-hover:scale-110 transition-transform"
+                >
+                  <CategoryIcon name={category.icon_name || category.name} size={22} />
+                </div>
+                <h3 className="font-heading font-bold text-base text-[#0B0E12] mb-1">
+                  {category.name}
+                </h3>
+                <p className="text-xs text-[#666E7A] font-medium line-clamp-1">
+                  {category.description || 'Verified Kaarigar'}
+                </p>
               </div>
-              <h3 className="font-bold text-sm text-[#1A1A1A] group-hover:text-[#1E5AA8] transition">
-                {category.name}
-              </h3>
-              <p className="text-[11px] text-gray-400 mt-1 line-clamp-1">
-                {category.description}
-              </p>
-            </button>
-          ))}
+            );
+          })}
         </div>
       </section>
 
       {/* How It Works Section */}
-      <section id="how-it-works" className="py-16 px-4 sm:px-6 lg:px-8 bg-white border-y border-gray-100">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <span className="text-xs font-bold text-[#1E5AA8] uppercase tracking-wider block mb-1">
-              Simple 3 Steps
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#1A1A1A]">
-              Naya Kaam Kaise Kaam Karta Hai?
-            </h2>
-            <p className="text-sm text-[#4A4A4A] mt-2">
-              Asaan aur safe process. Koi lambi call nahi, direct verified kaarigar connect karein.
+      <section id="how-it-works" className="py-16 px-4 sm:px-6 lg:px-8 max-w-[1200px] mx-auto w-full">
+        <div className="mb-10">
+          <div className="tag-label">HOW IT WORKS</div>
+          <h2 className="text-2xl sm:text-3xl font-heading font-extrabold text-[#0B0E12]">
+            3 steps, bas itna hi
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="how-card space-y-4">
+            <div className="w-10 h-10 rounded-full bg-[#0B0E12] text-white font-heading font-extrabold text-base flex items-center justify-center">
+              1
+            </div>
+            <h3 className="font-heading font-bold text-lg text-[#0B0E12]">
+              Search karein
+            </h3>
+            <p className="text-sm text-[#666E7A] font-medium leading-relaxed">
+              Apni zaroorat aur area batayein. Urdu ya English dono mein dhoond sakte hain.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-            {/* Step 1 */}
-            <div className="bg-[#FAFAFA] rounded-2xl p-6 border border-gray-100 text-center relative">
-              <div className="w-12 h-12 rounded-full bg-[#1E5AA8] text-white font-extrabold text-lg flex items-center justify-center mx-auto mb-4 shadow-sm">
-                1
-              </div>
-              <h3 className="font-bold text-lg text-[#1A1A1A] mb-2">
-                1. Search Karein
-              </h3>
-              <p className="text-xs text-[#4A4A4A] leading-relaxed">
-                Apni zaroorat (Electrician, Plumber, Tailor, AC technician etc.) aur shehar select karein ya AI smart search istemal karein.
-              </p>
+          <div className="how-card space-y-4">
+            <div className="w-10 h-10 rounded-full bg-[#0B0E12] text-white font-heading font-extrabold text-base flex items-center justify-center">
+              2
             </div>
+            <h3 className="font-heading font-bold text-lg text-[#0B0E12]">
+              Compare & Select
+            </h3>
+            <p className="text-sm text-[#666E7A] font-medium leading-relaxed">
+              Ratings, experience, rates aur verified badges dekh kar apna pasandida kaarigar chunein.
+            </p>
+          </div>
 
-            {/* Step 2 */}
-            <div className="bg-[#FAFAFA] rounded-2xl p-6 border border-gray-100 text-center relative">
-              <div className="w-12 h-12 rounded-full bg-[#1E5AA8] text-white font-extrabold text-lg flex items-center justify-center mx-auto mb-4 shadow-sm">
-                2
-              </div>
-              <h3 className="font-bold text-lg text-[#1A1A1A] mb-2">
-                2. Worker Choose Karein
-              </h3>
-              <p className="text-xs text-[#4A4A4A] leading-relaxed">
-                CNIC verification status, customer ratings, reviews, aur starting rates dekh kar apni marzi ka kaarigar chunein.
-              </p>
+          <div className="how-card space-y-4">
+            <div className="w-10 h-10 rounded-full bg-[#0B0E12] text-white font-heading font-extrabold text-base flex items-center justify-center">
+              3
             </div>
-
-            {/* Step 3 */}
-            <div className="bg-[#FAFAFA] rounded-2xl p-6 border border-gray-100 text-center relative">
-              <div className="w-12 h-12 rounded-full bg-[#F5820D] text-white font-extrabold text-lg flex items-center justify-center mx-auto mb-4 shadow-sm">
-                3
-              </div>
-              <h3 className="font-bold text-lg text-[#1A1A1A] mb-2">
-                3. Booking Confirm Karein
-              </h3>
-              <p className="text-xs text-[#4A4A4A] leading-relaxed">
-                Pata aur time specify kar ke request bhejein. Worker aap se rabta kar ke kaam mukammal karega.
-              </p>
-            </div>
+            <h3 className="font-heading font-bold text-lg text-[#0B0E12]">
+              Direct Contact & Book
+            </h3>
+            <p className="text-sm text-[#666E7A] font-medium leading-relaxed">
+              Worker ko direct call ya message karein aur kaam ka time set karein. Simple!
+            </p>
           </div>
         </div>
       </section>
 
       {/* Featured Verified Workers Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+      <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-[1200px] mx-auto w-full">
         <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-8 gap-4">
           <div>
-            <span className="text-xs font-bold text-[#1E5AA8] uppercase tracking-wider block">
-              Verified Providers
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#1A1A1A]">
-              Humare Top Rated Kaarigar
+            <div className="tag-label">TOP RATED</div>
+            <h2 className="text-2xl sm:text-3xl font-heading font-extrabold text-[#0B0E12]">
+              Kharay kaarigar, tayyar kaam ke liye
             </h2>
           </div>
           <button
             onClick={() => router.push('/search')}
-            className="text-xs font-bold text-[#1E5AA8] hover:underline flex items-center gap-1"
+            className="btn btn-secondary text-xs py-2 px-4 flex items-center gap-1 font-bold"
           >
             Tamam Workers Dekhein <ArrowRight size={14} />
           </button>
@@ -282,83 +385,29 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Why Naya Kaam Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-[#1E5AA8] to-[#102a52] text-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <span className="text-xs font-bold text-amber-400 uppercase tracking-wider block mb-1">
-              Peace of Mind Guaranteed
+      {/* CTA Strip Section */}
+      <section className="py-12 px-4 sm:px-6 lg:px-8 max-w-[1200px] mx-auto w-full">
+        <div className="bg-[#0B0E12] text-white rounded-[32px] p-8 sm:p-12 relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-8">
+          {/* Radial glow background */}
+          <div className="absolute -top-24 -left-24 w-80 h-80 rounded-full bg-[#39E07A] opacity-20 blur-3xl pointer-events-none" />
+
+          <div className="space-y-2 text-center sm:text-left relative z-10 max-w-xl">
+            <span className="text-xs font-bold text-[#39E07A] uppercase tracking-wider block">
+              FOR SKILLED WORKERS
             </span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-white">
-              Kyun Aitemad Karein Naya Kaam Par?
-            </h2>
-            <p className="text-xs text-blue-200 mt-2">
-              Humara maqsud aap ke ghar k kaam ko safe, transparent aur reliable banana hai.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Badge 1 */}
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/10 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-white/15 text-emerald-400 flex items-center justify-center mx-auto mb-4">
-                <CheckCircle2 size={28} />
-              </div>
-              <h3 className="font-bold text-lg text-white mb-2">
-                100% CNIC Verified Workers
-              </h3>
-              <p className="text-xs text-blue-100 leading-relaxed">
-                Tamam workers ki NADRA CNIC verification ki jaati hai taakey aap apne ghar mein be-khauf service le sakein.
-              </p>
-            </div>
-
-            {/* Badge 2 */}
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/10 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-white/15 text-amber-400 flex items-center justify-center mx-auto mb-4">
-                <DollarSign size={28} />
-              </div>
-              <h3 className="font-bold text-lg text-white mb-2">
-                Fair & Transparent Pricing
-              </h3>
-              <p className="text-xs text-blue-100 leading-relaxed">
-                Ghar per aane se pehle hourly ya per-job rate maloom hota hai. Koi hidden charges ya extra fee nahi.
-              </p>
-            </div>
-
-            {/* Badge 3 */}
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/10 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-white/15 text-blue-300 flex items-center justify-center mx-auto mb-4">
-                <Star size={28} />
-              </div>
-              <h3 className="font-bold text-lg text-white mb-2">
-                Rated by Real Customers
-              </h3>
-              <p className="text-xs text-blue-100 leading-relaxed">
-                Asli customer reviews aur AI generated trust summary se best worker choose karein apni requirement k mutabiq.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Become a worker banner */}
-      <section className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-        <div className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-100 card-shadow flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="space-y-2 text-center sm:text-left">
-            <span className="text-xs font-bold text-[#F5820D] uppercase tracking-wider block">
-              For Service Providers
-            </span>
-            <h3 className="text-xl sm:text-2xl font-bold text-[#1A1A1A]">
-              Kya Aap Electrician, Plumber ya Tailor Hain?
+            <h3 className="text-2xl sm:text-3xl font-heading font-extrabold text-white">
+              Kaarigar hain? Apna kaam grow karein Naya Kaam ke saath.
             </h3>
-            <p className="text-xs text-[#4A4A4A] max-w-xl">
-              Naya Kaam par aaj hi register karein, CNIC verify karwayen aur apne area se rozana naye customers hasil karein.
+            <p className="text-sm text-[#666E7A] font-medium leading-relaxed pt-1">
+              CNIC verify karwayen, customer requests hasil karein aur apne mohalle mein mashhoor hon.
             </p>
           </div>
+
           <button
             onClick={() => router.push('/worker-signup')}
-            className="px-6 py-3 rounded-xl bg-[#1E5AA8] hover:bg-[#174786] text-white font-bold text-sm transition shadow-md whitespace-nowrap"
+            className="btn btn-lime shrink-0 py-3.5 px-6 font-extrabold relative z-10"
           >
-            Worker Registration Karein
+            Worker ban jayein →
           </button>
         </div>
       </section>
@@ -379,8 +428,4 @@ export default function HomePage() {
       />
     </div>
   );
-}
-
-function Router() {
-  return useRouter();
 }

@@ -1,115 +1,71 @@
 import Link from 'next/link';
-import { Wrench, Phone, Mail, MapPin, Shield, CheckCircle2 } from 'lucide-react';
 
 export function Footer() {
   return (
-    <footer className="bg-[#102a52] text-white pt-12 pb-8 border-t border-[#1E5AA8]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-10 border-b border-blue-900/60">
-          {/* Brand Info */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-xl bg-[#F5820D] flex items-center justify-center text-white">
-                <Wrench size={20} />
+    <footer className="pt-14 pb-8 bg-[#F7F8F5] border-t border-[#EAECE7] font-body text-[#0B0E12]">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-8 pb-8 border-b border-[#EAECE7]">
+          {/* Brand Column */}
+          <div className="md:col-span-2 space-y-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-[#0B0E12] flex items-center justify-center -rotate-6 shadow-xs shrink-0">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M14.7 6.3a1 1 0 0 0-1.4 0L4.6 15A2 2 0 0 0 4 16.4V19a1 1 0 0 0 1 1h2.6a2 2 0 0 0 1.4-.6l8.7-8.7a1 1 0 0 0 0-1.4l-3-3Z" stroke="#39E07A" strokeWidth="1.8" />
+                </svg>
               </div>
-              <span className="text-2xl font-bold tracking-tight text-white">
+              <span className="font-heading font-extrabold text-xl text-[#0B0E12]">
                 Naya Kaam
               </span>
             </div>
-            <p className="text-xs text-blue-200 leading-relaxed">
-              Pakistan&apos;s trusted marketplace connecting homeowners with CNIC-verified skilled workers. Electricians, plumbers, AC technicians, tailors, tutors, drivers, and more.
+            <p className="text-sm text-[#666E7A] leading-relaxed max-w-sm font-medium">
+              Pakistan ke mohallon ko verified kaarigar se jorne wala platform. Electricians, plumbers, tailors, tutors aur bohot kuch.
             </p>
-            <div className="flex items-center gap-2 text-xs text-emerald-400 font-medium">
-              <CheckCircle2 size={14} /> 100% CNIC Verified Providers
+          </div>
+
+          {/* Company */}
+          <div>
+            <h4 className="font-heading font-bold text-sm text-[#0B0E12] mb-4">
+              Company
+            </h4>
+            <div className="flex flex-col gap-2 text-sm font-medium text-[#666E7A]">
+              <Link href="#" className="hover:text-[#0B0E12] transition">About</Link>
+              <Link href="#" className="hover:text-[#0B0E12] transition">Contact</Link>
+              <Link href="#" className="hover:text-[#0B0E12] transition">Careers</Link>
             </div>
           </div>
 
-          {/* Quick Links */}
+          {/* For Workers */}
           <div>
-            <h4 className="text-sm font-semibold uppercase tracking-wider text-blue-300 mb-4">
-              Quick Links
+            <h4 className="font-heading font-bold text-sm text-[#0B0E12] mb-4">
+              For Workers
             </h4>
-            <ul className="space-y-2.5 text-xs text-blue-100">
-              <li>
-                <Link href="/search" className="hover:text-white transition">
-                  Search Workers (Karachi, Lahore, ISL)
-                </Link>
-              </li>
-              <li>
-                <Link href="/#categories" className="hover:text-white transition">
-                  All Service Categories
-                </Link>
-              </li>
-              <li>
-                <Link href="/#how-it-works" className="hover:text-white transition">
-                  How Booking Works
-                </Link>
-              </li>
-              <li>
-                <Link href="/worker-signup" className="text-[#F5820D] hover:underline font-semibold">
-                  Become a Worker (Kaarigar Registration)
-                </Link>
-              </li>
-            </ul>
+            <div className="flex flex-col gap-2 text-sm font-medium text-[#666E7A]">
+              <Link href="/worker-signup" className="hover:text-[#0B0E12] transition">Become a worker</Link>
+              <Link href="#" className="hover:text-[#0B0E12] transition">Earnings</Link>
+              <Link href="#" className="hover:text-[#0B0E12] transition">Support</Link>
+            </div>
           </div>
 
-          {/* Top Services */}
+          {/* Legal & Admin */}
           <div>
-            <h4 className="text-sm font-semibold uppercase tracking-wider text-blue-300 mb-4">
-              Top Services
+            <h4 className="font-heading font-bold text-sm text-[#0B0E12] mb-4">
+              Legal
             </h4>
-            <ul className="space-y-2 text-xs text-blue-100 grid grid-cols-2 gap-x-2">
-              <li><Link href="/search?category=Electrician" className="hover:text-white">Electrician</Link></li>
-              <li><Link href="/search?category=Plumber" className="hover:text-white">Plumber</Link></li>
-              <li><Link href="/search?category=AC+Technician" className="hover:text-white">AC Repair</Link></li>
-              <li><Link href="/search?category=Tailor" className="hover:text-white">Tailor</Link></li>
-              <li><Link href="/search?category=Tutor" className="hover:text-white">Home Tutor</Link></li>
-              <li><Link href="/search?category=Driver" className="hover:text-white">Driver</Link></li>
-              <li><Link href="/search?category=Makeup+Artist" className="hover:text-white">Makeup Artist</Link></li>
-              <li><Link href="/search?category=Mehndi+Artist" className="hover:text-white">Mehndi Artist</Link></li>
-            </ul>
-          </div>
-
-          {/* Contact & Admin */}
-          <div>
-            <h4 className="text-sm font-semibold uppercase tracking-wider text-blue-300 mb-4">
-              Help & Contact
-            </h4>
-            <ul className="space-y-2.5 text-xs text-blue-100">
-              <li className="flex items-center gap-2">
-                <Phone size={14} className="text-[#F5820D]" />
-                <span>Helpline: +92 300 111 KAAM (5226)</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Mail size={14} className="text-[#F5820D]" />
-                <span>support@nayakaam.pk</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <MapPin size={14} className="text-[#F5820D]" />
-                <span>Karachi, Lahore & Islamabad Offices</span>
-              </li>
-              <li className="pt-2">
-                <Link
-                  href="/admin"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-900/80 hover:bg-blue-800 text-blue-200 text-xs transition border border-blue-700/50"
-                >
-                  <Shield size={13} />
-                  <span>Admin Portal</span>
-                </Link>
-              </li>
-            </ul>
+            <div className="flex flex-col gap-2 text-sm font-medium text-[#666E7A]">
+              <Link href="#" className="hover:text-[#0B0E12] transition">Terms</Link>
+              <Link href="#" className="hover:text-[#0B0E12] transition">Privacy</Link>
+              <Link href="/admin" className="text-[#1FB863] font-bold hover:underline transition">Admin Portal</Link>
+            </div>
           </div>
         </div>
 
-        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-blue-300 gap-4">
-          <p>© {new Date().getFullYear()} Naya Kaam Pakistan. All rights reserved.</p>
-          <div className="flex items-center gap-4">
-            <Link href="#" className="hover:text-white">Privacy Policy</Link>
-            <Link href="#" className="hover:text-white">Terms of Service</Link>
-            <Link href="#" className="hover:text-white">Safety Guidelines</Link>
-          </div>
+        {/* Footer Bottom */}
+        <div className="pt-6 flex flex-col sm:flex-row justify-between items-center text-xs font-semibold text-[#666E7A] gap-2">
+          <span>© 2026 Naya Kaam</span>
+          <span>Made in Pakistan 🇵🇰</span>
         </div>
       </div>
     </footer>
   );
 }
+

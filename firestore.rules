@@ -1,0 +1,73 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Categories (Public read, admin/authenticated create & update)
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow create, update: if isSignedIn() && isValidId(categoryId);
+      allow delete: if isSignedIn() && isValidId(categoryId);
+    }
+
+    // Workers (Public read, authenticated write & update)
+    match /workers/{workerId} {
+      allow read: if true;
+      allow create: if isSignedIn() && isValidId(workerId)
+        && incoming().name is string && incoming().name.size() <= 100
+        && incoming().phone is string && incoming().phone.size() <= 20
+        && incoming().category is string && incoming().category.size() <= 50;
+      allow update: if isSignedIn() && isValidId(workerId);
+      allow delete: if isSignedIn() && isValidId(workerId);
+    }
+
+    // Bookings (Allow read for authenticated or related, allow create with valid schema)
+    match /bookings/{bookingId} {
+      allow read: if true;
+      allow create: if isValidId(bookingId)
+        && incoming().customer_name is string && incoming().customer_name.size() <= 100
+        && incoming().customer_phone is string && incoming().customer_phone.size() <= 20
+        && incoming().worker_id is string && incoming().worker_id.size() <= 100
+        && incoming().category is string && incoming().category.size() <= 50;
+      allow update: if isValidId(bookingId);
+      allow delete: if isSignedIn() && isValidId(bookingId);
+    }
+
+    // Reviews (Public read, allow create)
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isValidId(reviewId)
+        && incoming().booking_id is string && incoming().booking_id.size() <= 100
+        && incoming().worker_id is string && incoming().worker_id.size() <= 100
+        && incoming().rating is number && incoming().rating >= 1 && incoming().rating <= 5
+        && incoming().comment is string && incoming().comment.size() <= 1000;
+      allow update, delete: if isSignedIn() && isValidId(reviewId);
+    }
+
+    // Connection test collection
+    match /test/{docId} {
+      allow read, write: if true;
+    }
+  }
+}

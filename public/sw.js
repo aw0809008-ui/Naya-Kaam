@@ -1,12 +1,14 @@
-// Eravauly Vintage - Service Worker for PWA
-const CACHE_NAME = 'eravauly-v1';
+// Naya Kaam - Service Worker for PWA
+const CACHE_NAME = 'nayakaam-v1';
 const OFFLINE_URL = '/offline.html';
 
-// Assets to cache immediately
+// Static assets to cache immediately
 const PRECACHE_ASSETS = [
   '/',
   '/manifest.json',
   '/offline.html',
+  '/icons/icon-192x192.png',
+  '/icons/icon-512x512.png'
 ];
 
 // Install event - cache core assets
@@ -35,16 +37,14 @@ self.addEventListener('activate', (event) => {
 
 // Fetch event - network first, fallback to cache
 self.addEventListener('fetch', (event) => {
-  // Skip non-GET requests
   if (event.request.method !== 'GET') return;
 
-  // Skip API requests (let them fail naturally for offline detection)
-  if (event.request.url.includes('/api/')) return;
+  // Skip API or Firestore requests
+  if (event.request.url.includes('/api/') || event.request.url.includes('firestore.googleapis.com')) return;
 
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // Clone and cache successful responses
         if (response.status === 200) {
           const responseClone = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -54,12 +54,10 @@ self.addEventListener('fetch', (event) => {
         return response;
       })
       .catch(() => {
-        // Try cache
         return caches.match(event.request).then((cachedResponse) => {
           if (cachedResponse) {
             return cachedResponse;
           }
-          // Return offline page for navigation requests
           if (event.request.mode === 'navigate') {
             return caches.match(OFFLINE_URL);
           }
@@ -69,15 +67,15 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Handle push notifications (for future use)
+// Handle push notifications (if enabled)
 self.addEventListener('push', (event) => {
   const options = {
-    body: event.data?.text() || 'New notification from Eravauly Vintage',
+    body: event.data?.text() || 'New update on Naya Kaam',
     icon: '/icons/icon-192x192.png',
-    badge: '/icons/icon-72x72.png',
+    badge: '/icons/icon-192x192.png',
     vibrate: [100, 50, 100],
   };
   event.waitUntil(
-    self.registration.showNotification('Eravauly Vintage', options)
+    self.registration.showNotification('Naya Kaam', options)
   );
 });

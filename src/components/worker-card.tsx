@@ -13,78 +13,82 @@ interface WorkerCardProps {
 
 export function WorkerCard({ worker, onBookClick }: WorkerCardProps) {
   return (
-    <div className="bg-white rounded-[12px] border border-gray-100 p-5 card-shadow card-shadow-hover flex flex-col justify-between h-full relative group">
+    <div className="bg-white rounded-[26px] border border-[#EAECE7] p-6 hover:-translate-y-1.5 hover:shadow-[0_16px_36px_rgba(11,14,18,0.08)] transition-all duration-200 flex flex-col justify-between h-full relative group">
       <div>
         {/* Availability tag & Category badge */}
-        <div className="flex items-center justify-between gap-2 mb-3">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#1E5AA8]/8 text-[#1E5AA8] text-xs font-semibold">
-            <CategoryIcon name={worker.category} size={14} />
+        <div className="flex items-center justify-between gap-2 mb-4">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-100 text-[#0B0E12] text-xs font-bold border border-gray-200">
+            <span className="w-5 h-5 rounded-full bg-[#0B0E12] text-[#39E07A] flex items-center justify-center shrink-0">
+              <CategoryIcon name={worker.category} size={12} />
+            </span>
             {worker.category}
           </span>
           <span
-            className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${
+            className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1.5 ${
               worker.is_available
-                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                : 'bg-amber-50 text-amber-700 border border-amber-200'
+                ? 'bg-[#D6F5E3] text-[#1FB863]'
+                : 'bg-[#FFE3EC] text-[#FF5F82]'
             }`}
           >
-            {worker.is_available ? 'Available Now' : 'Busy'}
+            <span className={`w-1.5 h-1.5 rounded-full ${worker.is_available ? 'bg-[#1FB863] animate-pulse' : 'bg-[#FF5F82]'}`} />
+            {worker.is_available ? 'Available' : 'Busy'}
           </span>
         </div>
 
         {/* Worker Header: Photo, Name, Verified */}
-        <div className="flex items-start gap-3.5 mb-3">
-          <div className="relative w-14 h-14 rounded-full overflow-hidden border-2 border-gray-100 shrink-0 bg-gray-100 shadow-xs">
+        <div className="flex items-start gap-3.5 mb-4">
+          <div className="relative w-14 h-14 rounded-2xl overflow-hidden border-2 border-[#0B0E12] shrink-0 bg-gray-100 shadow-xs">
             <Image
               src={worker.profile_photo_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200'}
               alt={worker.name}
               fill
-              className="object-cover"
+              className="object-cover group-hover:scale-105 transition-transform duration-300"
               referrerPolicy="no-referrer"
             />
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5 flex-wrap">
-              <h3 className="font-bold text-base text-[#1A1A1A] truncate group-hover:text-[#1E5AA8] transition">
+              <h3 className="font-heading font-extrabold text-base text-[#0B0E12] truncate group-hover:text-[#1FB863] transition-colors">
                 {worker.name}
               </h3>
-              {worker.is_verified && <VerifiedBadge size={15} showText={false} />}
+              {worker.is_verified && <VerifiedBadge size={16} showText={false} />}
             </div>
-            <p className="text-xs text-[#4A4A4A] flex items-center gap-1 mt-1">
-              <MapPin size={13} className="text-gray-400 shrink-0" />
+            <p className="text-xs text-[#666E7A] flex items-center gap-1 mt-1 font-body font-medium">
+              <MapPin size={13} className="text-[#0B0E12] shrink-0" />
               <span className="truncate">
                 {worker.area ? `${worker.area}, ` : ''}{worker.city}
               </span>
             </p>
-            <p className="text-xs text-gray-500 mt-0.5">
-              {worker.years_experience} years experience
+            <p className="text-xs text-[#666E7A] mt-0.5 font-body flex items-center gap-1 font-medium">
+              <Briefcase size={12} className="text-[#666E7A]" />
+              <span>{worker.years_experience} yrs experience</span>
             </p>
           </div>
         </div>
 
         {/* Rating summary */}
-        <div className="my-3 py-2 border-y border-gray-100 flex items-center justify-between text-xs">
-          <StarRating rating={worker.average_rating} totalReviews={worker.total_reviews} size={15} />
-          <span className="font-semibold text-gray-700">
-            {worker.total_reviews > 0 ? `${worker.average_rating} Score` : 'New'}
+        <div className="my-3.5 py-2.5 border-y border-[#EAECE7] flex items-center justify-between text-xs bg-[#F7F8F5] px-3 rounded-xl">
+          <StarRating rating={worker.average_rating} totalReviews={worker.total_reviews} size={14} />
+          <span className="font-bold text-[#0B0E12]">
+            {worker.total_reviews > 0 ? `${worker.average_rating} (${worker.total_reviews})` : 'New'}
           </span>
         </div>
 
         {/* Short Bio snippet */}
-        <p className="text-xs text-[#4A4A4A] line-clamp-2 leading-relaxed mb-4">
+        <p className="text-xs text-[#666E7A] line-clamp-2 leading-relaxed mb-5 font-body font-medium">
           {worker.bio}
         </p>
       </div>
 
       {/* Footer: Price & View Profile CTA */}
-      <div className="pt-2 border-t border-gray-50 flex items-center justify-between gap-2 mt-auto">
+      <div className="pt-3 border-t border-[#EAECE7] flex items-center justify-between gap-2 mt-auto">
         <div>
-          <span className="text-[10px] uppercase font-semibold text-gray-400 block tracking-wider">
-            Starting Rate
+          <span className="text-[10px] uppercase font-bold text-[#666E7A] block tracking-wider">
+            Rate
           </span>
-          <span className="text-base font-bold text-[#1E5AA8]">
+          <span className="text-base font-extrabold text-[#0B0E12] font-heading">
             Rs. {worker.rate_amount.toLocaleString()}
-            <span className="text-xs font-normal text-gray-500 ml-0.5">
+            <span className="text-xs font-normal text-[#666E7A] ml-0.5 font-body">
               /{worker.rate_type === 'hourly' ? 'hr' : 'job'}
             </span>
           </span>
@@ -94,14 +98,14 @@ export function WorkerCard({ worker, onBookClick }: WorkerCardProps) {
           {onBookClick && (
             <button
               onClick={() => onBookClick(worker)}
-              className="px-3 py-1.5 rounded-xl bg-[#F5820D] hover:bg-[#D97109] text-white text-xs font-bold transition shadow-xs"
+              className="btn btn-lime text-xs py-2 px-3.5 font-bold"
             >
               Book
             </button>
           )}
           <Link
             href={`/worker/${worker.id}`}
-            className="px-3 py-1.5 rounded-xl border border-[#1E5AA8] text-[#1E5AA8] hover:bg-[#1E5AA8] hover:text-white text-xs font-semibold transition flex items-center gap-1"
+            className="btn btn-secondary text-xs py-2 px-3 flex items-center gap-1 font-bold"
           >
             Profile
             <ChevronRight size={14} />

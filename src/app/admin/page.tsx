@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Navbar } from '@/components/navbar';
@@ -32,21 +32,19 @@ import {
 } from 'lucide-react';
 
 export default function AdminPage() {
-  const [workers, setWorkers] = useState<Worker[]>([]);
-  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [workers, setWorkers] = useState<Worker[]>(() => {
+    initializeStore();
+    return getWorkers();
+  });
+  const [bookings, setBookings] = useState<Booking[]>(() => getBookings());
 
   const [activeTab, setActiveTab] = useState<'verifications' | 'workers' | 'bookings' | 'commission'>('verifications');
   const [selectedCnicWorker, setSelectedCnicWorker] = useState<Worker | null>(null);
 
-  useEffect(() => {
-    initializeStore();
-    refreshData();
-  }, []);
-
-  const refreshData = () => {
+  const refreshData = useCallback(() => {
     setWorkers(getWorkers());
     setBookings(getBookings());
-  };
+  }, []);
 
   const handleApproveCNIC = (workerId: string) => {
     verifyWorkerCNIC(workerId, true);
@@ -67,18 +65,18 @@ export default function AdminPage() {
   const totalPlatformRevenue = completedBookings.reduce((sum, b) => sum + b.commission_amount, 0);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAFAFA]">
+    <div className="min-h-screen flex flex-col bg-[#F7F8FA] font-body">
       <Navbar />
 
       {/* Admin Header */}
-      <div className="bg-[#102a52] text-white py-8 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-gradient-to-r from-[#102a52] via-[#1E5AA8] to-[#154277] text-white py-10 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1200px] mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold mb-2 border border-amber-500/30">
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold mb-3 border border-amber-500/30">
               <ShieldAlert size={14} /> Administrator Portal
             </div>
-            <h1 className="text-2xl font-bold tracking-tight">Naya Kaam Control Center</h1>
-            <p className="text-xs text-blue-200 mt-1">
+            <h1 className="text-2xl sm:text-3xl font-heading font-bold tracking-tight">Naya Kaam Control Center</h1>
+            <p className="text-xs text-blue-100 mt-1 font-body">
               NADRA CNIC verification, provider approval, and 10% commission revenue ledger
             </p>
           </div>
@@ -86,7 +84,7 @@ export default function AdminPage() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => refreshData()}
-              className="px-3.5 py-2 rounded-xl bg-blue-900/80 hover:bg-blue-800 text-xs font-semibold text-white transition border border-blue-700/60"
+              className="px-4 py-2.5 rounded-[10px] bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition border border-white/20 backdrop-blur-md"
             >
               Refresh Data
             </button>
@@ -94,62 +92,62 @@ export default function AdminPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-1">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full flex-1">
         {/* Key Metrics Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white p-5 rounded-2xl border border-gray-100 card-shadow space-y-1">
-            <div className="flex items-center justify-between text-gray-400">
-              <span className="text-xs font-bold uppercase tracking-wider">Pending CNIC</span>
+          <div className="bg-white p-5 rounded-2xl border border-[#E5E7EB] shadow-xs space-y-1">
+            <div className="flex items-center justify-between text-[#6B7280]">
+              <span className="text-xs font-bold font-heading uppercase tracking-wider">Pending CNIC</span>
               <FileCheck size={18} className="text-amber-500" />
             </div>
-            <span className="text-2xl font-extrabold text-amber-600 block">
+            <span className="text-2xl font-heading font-extrabold text-amber-600 block">
               {pendingVerifications.length}
             </span>
-            <span className="text-[11px] text-gray-400">Awaiting approval</span>
+            <span className="text-[11px] text-[#6B7280] font-body">Awaiting approval</span>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-gray-100 card-shadow space-y-1">
-            <div className="flex items-center justify-between text-gray-400">
-              <span className="text-xs font-bold uppercase tracking-wider">Verified Workers</span>
+          <div className="bg-white p-5 rounded-2xl border border-[#E5E7EB] shadow-xs space-y-1">
+            <div className="flex items-center justify-between text-[#6B7280]">
+              <span className="text-xs font-bold font-heading uppercase tracking-wider">Verified Workers</span>
               <Users size={18} className="text-[#1E5AA8]" />
             </div>
-            <span className="text-2xl font-extrabold text-[#1E5AA8] block">
+            <span className="text-2xl font-heading font-extrabold text-[#1E5AA8] block">
               {totalVerified}
             </span>
-            <span className="text-[11px] text-gray-400">Out of {workers.length} total</span>
+            <span className="text-[11px] text-[#6B7280] font-body">Out of {workers.length} total</span>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-gray-100 card-shadow space-y-1">
-            <div className="flex items-center justify-between text-gray-400">
-              <span className="text-xs font-bold uppercase tracking-wider">Total Bookings</span>
+          <div className="bg-white p-5 rounded-2xl border border-[#E5E7EB] shadow-xs space-y-1">
+            <div className="flex items-center justify-between text-[#6B7280]">
+              <span className="text-xs font-bold font-heading uppercase tracking-wider">Total Bookings</span>
               <Calendar size={18} className="text-emerald-600" />
             </div>
-            <span className="text-2xl font-extrabold text-emerald-600 block">
+            <span className="text-2xl font-heading font-extrabold text-emerald-600 block">
               {bookings.length}
             </span>
-            <span className="text-[11px] text-gray-400">{completedBookings.length} completed</span>
+            <span className="text-[11px] text-[#6B7280] font-body">{completedBookings.length} completed</span>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-gray-100 card-shadow space-y-1">
-            <div className="flex items-center justify-between text-gray-400">
-              <span className="text-xs font-bold uppercase tracking-wider">Platform Revenue</span>
+          <div className="bg-white p-5 rounded-2xl border border-[#E5E7EB] shadow-xs space-y-1">
+            <div className="flex items-center justify-between text-[#6B7280]">
+              <span className="text-xs font-bold font-heading uppercase tracking-wider">Platform Revenue</span>
               <TrendingUp size={18} className="text-purple-600" />
             </div>
-            <span className="text-2xl font-extrabold text-purple-700 block">
+            <span className="text-2xl font-heading font-extrabold text-purple-700 block">
               Rs. {totalPlatformRevenue.toLocaleString()}
             </span>
-            <span className="text-[11px] text-gray-400">10% commission earnings</span>
+            <span className="text-[11px] text-[#6B7280] font-body">10% commission earnings</span>
           </div>
         </div>
 
         {/* Admin Navigation Tabs */}
-        <div className="flex border-b border-gray-200 space-x-6 text-sm font-bold mb-6 overflow-x-auto">
+        <div className="flex border-b border-[#E5E7EB] space-x-6 text-xs font-heading font-bold mb-6 overflow-x-auto">
           <button
             onClick={() => setActiveTab('verifications')}
             className={`pb-3 border-b-2 transition whitespace-nowrap ${
               activeTab === 'verifications'
                 ? 'border-[#1E5AA8] text-[#1E5AA8]'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
+                : 'border-transparent text-[#6B7280] hover:text-[#1A1A1A]'
             }`}
           >
             CNIC Verification Queue ({pendingVerifications.length})
@@ -159,7 +157,7 @@ export default function AdminPage() {
             className={`pb-3 border-b-2 transition whitespace-nowrap ${
               activeTab === 'workers'
                 ? 'border-[#1E5AA8] text-[#1E5AA8]'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
+                : 'border-transparent text-[#6B7280] hover:text-[#1A1A1A]'
             }`}
           >
             All Workers ({workers.length})
@@ -169,7 +167,7 @@ export default function AdminPage() {
             className={`pb-3 border-b-2 transition whitespace-nowrap ${
               activeTab === 'bookings'
                 ? 'border-[#1E5AA8] text-[#1E5AA8]'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
+                : 'border-transparent text-[#6B7280] hover:text-[#1A1A1A]'
             }`}
           >
             Master Bookings ({bookings.length})
@@ -179,7 +177,7 @@ export default function AdminPage() {
             className={`pb-3 border-b-2 transition whitespace-nowrap ${
               activeTab === 'commission'
                 ? 'border-[#1E5AA8] text-[#1E5AA8]'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
+                : 'border-transparent text-[#6B7280] hover:text-[#1A1A1A]'
             }`}
           >
             Commission Revenue Ledger

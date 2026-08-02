@@ -24,13 +24,19 @@ import {
 function SearchContent() {
   const searchParams = useSearchParams();
 
-  const [workers, setWorkers] = useState<Worker[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [workers, setWorkers] = useState<Worker[]>(() => {
+    initializeStore();
+    return getWorkers();
+  });
+  const [categories, setCategories] = useState<Category[]>(() => getCategories());
 
   // Filter states
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedCity, setSelectedCity] = useState<string>('');
-  const [selectedArea, setSelectedArea] = useState<string>('');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(() => {
+    const categoryParam = searchParams.get('category');
+    return categoryParam ? [categoryParam] : [];
+  });
+  const [selectedCity, setSelectedCity] = useState<string>(() => searchParams.get('city') || '');
+  const [selectedArea, setSelectedArea] = useState<string>(() => searchParams.get('area') || '');
   const [minRating, setMinRating] = useState<number>(0);
   const [maxPrice, setMaxPrice] = useState<number>(10000);
   const [verifiedOnly, setVerifiedOnly] = useState<boolean>(false);
@@ -44,26 +50,7 @@ function SearchContent() {
   const [selectedWorkerForBooking, setSelectedWorkerForBooking] = useState<Worker | null>(null);
   const [isSmartSearchOpen, setIsSmartSearchOpen] = useState<boolean>(false);
 
-  useEffect(() => {
-    initializeStore();
-    setWorkers(getWorkers());
-    setCategories(getCategories());
 
-    // Read initial query params
-    const categoryParam = searchParams.get('category');
-    const cityParam = searchParams.get('city');
-    const areaParam = searchParams.get('area');
-
-    if (categoryParam) {
-      setSelectedCategories([categoryParam]);
-    }
-    if (cityParam) {
-      setSelectedCity(cityParam);
-    }
-    if (areaParam) {
-      setSelectedArea(areaParam);
-    }
-  }, [searchParams]);
 
   const handleCategoryToggle = (catName: string) => {
     if (selectedCategories.includes(catName)) {
@@ -156,25 +143,25 @@ function SearchContent() {
   const citiesList = ['Karachi', 'Lahore', 'Islamabad', 'Rawalpindi', 'Faisalabad'];
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAFAFA]">
+    <div className="min-h-screen flex flex-col bg-[#F7F8F5] text-[#0B0E12] font-body">
       <Navbar />
 
       {/* Top Banner & Quick Controls */}
-      <div className="bg-white border-b border-gray-100 py-6 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-white border-b border-[#EAECE7] py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1200px] mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-[#1A1A1A]">
+            <h1 className="text-2xl sm:text-3xl font-heading font-extrabold text-[#0B0E12]">
               Mahir Kaarigar Search (Skilled Workers)
             </h1>
-            <p className="text-xs text-[#4A4A4A] mt-1">
-              Showing {filteredWorkers.length} verified & rating-backed service providers
+            <p className="text-xs text-[#666E7A] mt-1 font-medium">
+              Showing {filteredWorkers.length} verified & rating-backed service providers across Pakistan
             </p>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-3">
             <button
               onClick={() => setIsSmartSearchOpen(true)}
-              className="px-3.5 py-2 rounded-xl bg-[#1E5AA8]/10 text-[#1E5AA8] hover:bg-[#1E5AA8]/20 text-xs font-bold flex items-center gap-1.5 transition border border-[#1E5AA8]/20"
+              className="btn btn-lime text-xs py-2 px-3.5 font-bold"
             >
               <Sparkles size={15} />
               <span>AI Smart Search</span>
@@ -182,7 +169,7 @@ function SearchContent() {
 
             <button
               onClick={() => setMobileFilterOpen(true)}
-              className="lg:hidden px-3.5 py-2 rounded-xl bg-gray-100 text-gray-700 text-xs font-semibold flex items-center gap-1.5"
+              className="lg:hidden btn btn-secondary text-xs py-2 px-3.5 font-bold"
             >
               <SlidersHorizontal size={15} />
               <span>Filters</span>
@@ -192,26 +179,26 @@ function SearchContent() {
       </div>
 
       {/* Main Layout: Filters Sidebar + Results Grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-1">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full flex-1">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Desktop Filters Sidebar */}
-          <aside className="hidden lg:block space-y-6 bg-white p-5 rounded-2xl border border-gray-100 card-shadow h-fit sticky top-20">
-            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-              <span className="font-bold text-sm text-[#1A1A1A] flex items-center gap-1.5">
-                <Filter size={16} className="text-[#1E5AA8]" />
+          <aside className="hidden lg:block space-y-6 bg-white p-6 rounded-[26px] border border-[#EAECE7] h-fit sticky top-24 shadow-sm">
+            <div className="flex items-center justify-between pb-4 border-b border-[#EAECE7]">
+              <span className="font-heading font-extrabold text-sm text-[#0B0E12] flex items-center gap-2">
+                <Filter size={16} className="text-[#1FB863]" />
                 Filter Search
               </span>
               <button
                 onClick={handleResetFilters}
-                className="text-[11px] text-[#1E5AA8] font-semibold hover:underline flex items-center gap-1"
+                className="text-xs text-[#1FB863] font-bold hover:underline flex items-center gap-1"
               >
                 <RefreshCcw size={12} /> Reset All
               </button>
             </div>
 
             {/* Keyword Search Input */}
-            <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1.5">
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold text-[#0B0E12] font-heading">
                 Search Keyword
               </label>
               <div className="relative">
@@ -220,17 +207,17 @@ function SearchContent() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="e.g. Tariq, UPS, Inverter AC..."
-                  className="w-full pl-8 pr-3 py-2 text-xs rounded-xl border border-gray-200 focus:outline-hidden focus:border-[#1E5AA8]"
+                  className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl border border-[#EAECE7] focus:outline-none focus:border-[#0B0E12] text-[#0B0E12] bg-[#F7F8F5] font-medium"
                 />
-                <Search size={14} className="absolute left-2.5 top-2.5 text-gray-400" />
+                <Search size={14} className="absolute left-3 top-3 text-[#666E7A]" />
               </div>
             </div>
 
             {/* CNIC Verified Toggle */}
-            <div className="pt-2 border-t border-gray-100 flex items-center justify-between">
+            <div className="pt-3 border-t border-[#EAECE7] flex items-center justify-between">
               <div>
-                <span className="text-xs font-bold text-[#1A1A1A] block">Verified Only</span>
-                <span className="text-[10px] text-gray-400">CNIC verified workers</span>
+                <span className="text-xs font-bold text-[#0B0E12] block font-heading">Verified Only</span>
+                <span className="text-[11px] text-[#666E7A] font-medium">CNIC verified workers</span>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
@@ -239,23 +226,23 @@ function SearchContent() {
                   onChange={(e) => setVerifiedOnly(e.target.checked)}
                   className="sr-only peer"
                 />
-                <div className="w-9 h-5 bg-gray-200 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#1E5AA8]"></div>
+                <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#1FB863]"></div>
               </label>
             </div>
 
             {/* Category Checkboxes */}
-            <div className="pt-2 border-t border-gray-100">
-              <label className="block text-xs font-bold text-gray-700 mb-2">
+            <div className="pt-3 border-t border-[#EAECE7]">
+              <label className="block text-xs font-bold text-[#0B0E12] font-heading mb-2.5">
                 Categories
               </label>
-              <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+              <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
                 {categories.map((cat) => (
-                  <label key={cat.id} className="flex items-center gap-2 text-xs text-gray-700 cursor-pointer hover:text-[#1E5AA8]">
+                  <label key={cat.id} className="flex items-center gap-2.5 text-xs text-[#0B0E12] cursor-pointer hover:text-[#1FB863] font-medium">
                     <input
                       type="checkbox"
                       checked={selectedCategories.includes(cat.name)}
                       onChange={() => handleCategoryToggle(cat.name)}
-                      className="rounded-xs text-[#1E5AA8] focus:ring-[#1E5AA8]"
+                      className="rounded border-[#EAECE7] text-[#1FB863] focus:ring-[#1FB863] w-4 h-4"
                     />
                     <span>{cat.name}</span>
                   </label>
@@ -264,14 +251,14 @@ function SearchContent() {
             </div>
 
             {/* City Dropdown */}
-            <div className="pt-2 border-t border-gray-100">
-              <label className="block text-xs font-bold text-gray-700 mb-1.5">
+            <div className="pt-3 border-t border-[#EAECE7] space-y-1.5">
+              <label className="block text-xs font-bold text-[#0B0E12] font-heading">
                 City / Location
               </label>
               <select
                 value={selectedCity}
                 onChange={(e) => setSelectedCity(e.target.value)}
-                className="w-full p-2 text-xs rounded-xl border border-gray-200 focus:outline-hidden focus:border-[#1E5AA8] bg-white"
+                className="w-full p-2.5 text-xs rounded-xl border border-[#EAECE7] focus:outline-none focus:border-[#0B0E12] bg-[#F7F8F5] font-medium text-[#0B0E12]"
               >
                 <option value="">All Pakistan Cities</option>
                 {citiesList.map((city) => (
@@ -283,8 +270,8 @@ function SearchContent() {
             </div>
 
             {/* Specific Area text input */}
-            <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1">
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold text-[#0B0E12] font-heading">
                 Area / Neighborhood
               </label>
               <div className="relative">
@@ -293,15 +280,15 @@ function SearchContent() {
                   value={selectedArea}
                   onChange={(e) => setSelectedArea(e.target.value)}
                   placeholder="e.g. Gulshan, DHA, F-8"
-                  className="w-full pl-8 pr-3 py-2 text-xs rounded-xl border border-gray-200 focus:outline-hidden focus:border-[#1E5AA8]"
+                  className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl border border-[#EAECE7] focus:outline-none focus:border-[#0B0E12] text-[#0B0E12] bg-[#F7F8F5] font-medium"
                 />
-                <MapPin size={14} className="absolute left-2.5 top-2.5 text-gray-400" />
+                <MapPin size={14} className="absolute left-3 top-3 text-[#666E7A]" />
               </div>
             </div>
 
             {/* Minimum Rating Selector */}
-            <div className="pt-2 border-t border-gray-100">
-              <label className="block text-xs font-bold text-gray-700 mb-2">
+            <div className="pt-3 border-t border-[#EAECE7]">
+              <label className="block text-xs font-bold text-[#0B0E12] font-heading mb-2">
                 Minimum Rating
               </label>
               <div className="flex items-center gap-1.5">
@@ -309,10 +296,10 @@ function SearchContent() {
                   <button
                     key={ratingVal}
                     onClick={() => setMinRating(ratingVal)}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition ${
+                    className={`px-3 py-1.5 rounded-full text-xs font-bold border transition ${
                       minRating === ratingVal
-                        ? 'bg-[#1E5AA8] text-white border-[#1E5AA8]'
-                        : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
+                        ? 'bg-[#0B0E12] text-[#39E07A] border-[#0B0E12]'
+                        : 'bg-[#F7F8F5] text-[#0B0E12] border-[#EAECE7] hover:bg-gray-100'
                     }`}
                   >
                     {ratingVal === 0 ? 'Any' : `${ratingVal}+ ★`}
@@ -322,10 +309,10 @@ function SearchContent() {
             </div>
 
             {/* Price Slider */}
-            <div className="pt-2 border-t border-gray-100">
-              <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-bold text-gray-700">Max Starting Rate</label>
-                <span className="text-xs font-bold text-[#1E5AA8]">Rs. {maxPrice.toLocaleString()}</span>
+            <div className="pt-3 border-t border-[#EAECE7]">
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-xs font-bold text-[#0B0E12] font-heading">Max Rate</label>
+                <span className="text-xs font-extrabold text-[#0B0E12]">Rs. {maxPrice.toLocaleString()}</span>
               </div>
               <input
                 type="range"
@@ -334,7 +321,7 @@ function SearchContent() {
                 step={500}
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(Number(e.target.value))}
-                className="w-full accent-[#1E5AA8]"
+                className="w-full accent-[#0B0E12]"
               />
             </div>
           </aside>
@@ -342,42 +329,42 @@ function SearchContent() {
           {/* Main Area: Top controls + Worker Grid */}
           <main className="lg:col-span-3 space-y-6">
             {/* Top Sort Bar */}
-            <div className="bg-white p-3.5 rounded-2xl border border-gray-100 card-shadow flex items-center justify-between gap-4">
-              <div className="flex items-center gap-2 text-xs text-gray-600 flex-wrap">
-                <span className="font-semibold text-[#1A1A1A]">Active Filters:</span>
+            <div className="bg-white p-4 rounded-[20px] border border-[#EAECE7] flex items-center justify-between gap-4 shadow-xs">
+              <div className="flex items-center gap-2 text-xs text-[#666E7A] flex-wrap font-body">
+                <span className="font-bold text-[#0B0E12] font-heading">Active Filters:</span>
                 {selectedCategories.map((c) => (
                   <span
                     key={c}
-                    className="bg-blue-50 text-[#1E5AA8] px-2 py-0.5 rounded-md text-[11px] font-medium flex items-center gap-1"
+                    className="bg-[#D6F5E3] text-[#1FB863] px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1.5 border border-[#1FB863]/20"
                   >
                     {c}
-                    <X size={12} className="cursor-pointer" onClick={() => handleCategoryToggle(c)} />
+                    <X size={12} className="cursor-pointer hover:text-[#0B0E12]" onClick={() => handleCategoryToggle(c)} />
                   </span>
                 ))}
                 {selectedCity && (
-                  <span className="bg-blue-50 text-[#1E5AA8] px-2 py-0.5 rounded-md text-[11px] font-medium flex items-center gap-1">
+                  <span className="bg-[#D6F5E3] text-[#1FB863] px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1.5 border border-[#1FB863]/20">
                     {selectedCity}
-                    <X size={12} className="cursor-pointer" onClick={() => setSelectedCity('')} />
+                    <X size={12} className="cursor-pointer hover:text-[#0B0E12]" onClick={() => setSelectedCity('')} />
                   </span>
                 )}
                 {verifiedOnly && (
-                  <span className="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-md text-[11px] font-medium flex items-center gap-1">
+                  <span className="bg-[#D6F5E3] text-[#1FB863] px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1.5 border border-[#1FB863]/20">
                     Verified
-                    <X size={12} className="cursor-pointer" onClick={() => setVerifiedOnly(false)} />
+                    <X size={12} className="cursor-pointer hover:text-[#0B0E12]" onClick={() => setVerifiedOnly(false)} />
                   </span>
                 )}
                 {!selectedCategories.length && !selectedCity && !verifiedOnly && (
-                  <span className="text-gray-400">None (Showing all)</span>
+                  <span className="text-[#666E7A]">None (Showing all)</span>
                 )}
               </div>
 
               {/* Sort Dropdown */}
               <div className="flex items-center gap-2 shrink-0">
-                <span className="text-xs text-gray-500 font-medium hidden sm:inline">Sort by:</span>
+                <span className="text-xs text-[#666E7A] font-medium hidden sm:inline">Sort by:</span>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as any)}
-                  className="p-1.5 text-xs rounded-xl border border-gray-200 focus:outline-hidden focus:border-[#1E5AA8] bg-white font-semibold text-[#1A1A1A]"
+                  className="p-2 text-xs rounded-xl border border-[#EAECE7] focus:outline-none focus:border-[#0B0E12] bg-[#F7F8F5] font-bold text-[#0B0E12]"
                 >
                   <option value="rating">Rating (High to Low)</option>
                   <option value="price">Price (Low to High)</option>
@@ -399,19 +386,19 @@ function SearchContent() {
               </div>
             ) : (
               /* Empty State */
-              <div className="bg-white rounded-2xl p-12 text-center border border-gray-100 card-shadow space-y-4 max-w-md mx-auto my-8">
-                <div className="w-16 h-16 rounded-full bg-blue-50 text-[#1E5AA8] mx-auto flex items-center justify-center">
-                  <Search size={32} />
+              <div className="bg-white rounded-[26px] p-12 text-center border border-[#EAECE7] space-y-4 max-w-md mx-auto my-8 shadow-sm">
+                <div className="w-16 h-16 rounded-2xl bg-[#0B0E12] text-[#39E07A] mx-auto flex items-center justify-center -rotate-6">
+                  <Search size={28} />
                 </div>
-                <h3 className="text-lg font-bold text-[#1A1A1A]">
-                  Koi Kaarigar Nahi Mila (No Workers Found)
+                <h3 className="text-lg font-heading font-extrabold text-[#0B0E12]">
+                  Koi Kaarigar Nahi Mila
                 </h3>
-                <p className="text-xs text-[#4A4A4A] leading-relaxed">
+                <p className="text-xs text-[#666E7A] font-medium leading-relaxed">
                   Aapke select kiye gaye filters ya city mein filhaal koi worker available nahi hai. Filter change kar k dobara search karein.
                 </p>
                 <button
                   onClick={handleResetFilters}
-                  className="px-5 py-2.5 rounded-xl bg-[#1E5AA8] hover:bg-[#174786] text-white font-bold text-xs transition shadow-xs"
+                  className="btn btn-primary text-xs py-2.5 px-5 font-bold"
                 >
                   Reset All Filters
                 </button>
