@@ -24,7 +24,6 @@ export interface Worker {
   cnic_back_url?: string;
   profile_photo_url: string;
   category: string;
-  skills?: string[];
   bio: string;
   trust_summary?: string;
   years_experience: number;
@@ -90,4 +89,53 @@ export interface SmartSearchParsed {
   city?: string;
   area?: string;
   urgency?: string;
+}
+
+export type CallStatus = 'offering' | 'connected' | 'ended' | 'declined' | 'missed';
+
+export interface CallRecord {
+  id: string;
+  booking_id: string;
+  caller_id: string;
+  caller_name: string;
+  caller_photo?: string;
+  caller_role: 'customer' | 'worker';
+  callee_id: string;
+  callee_name: string;
+  callee_photo?: string;
+  callee_role: 'customer' | 'worker';
+  category?: string;
+  status: CallStatus;
+  offer?: { type: 'answer' | 'offer' | 'pranswer' | 'rollback'; sdp?: string };
+  answer?: { type: 'answer' | 'offer' | 'pranswer' | 'rollback'; sdp?: string };
+  caller_candidates?: Array<{ candidate: string; sdpMid: string | null; sdpMLineIndex: number | null }>;
+  callee_candidates?: Array<{ candidate: string; sdpMid: string | null; sdpMLineIndex: number | null }>;
+  duration_seconds: number;
+  created_at: string;
+  ended_at?: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  booking_id: string;
+  sender_id: string;
+  sender_name: string;
+  sender_role: 'customer' | 'worker';
+  text: string;
+  created_at: string;
+}
+
+export interface DisputeReport {
+  id: string;
+  booking_id: string;
+  reporter_id: string;
+  reporter_name: string;
+  reporter_role: 'customer' | 'worker';
+  reported_user_id: string;
+  reported_user_name: string;
+  issue_category: 'overcharging' | 'poor_quality' | 'no_show' | 'unprofessional' | 'other';
+  reason: string;
+  status: 'open' | 'investigating' | 'resolved' | 'dismissed';
+  created_at: string;
+  resolution_notes?: string;
 }

@@ -298,7 +298,7 @@ export function WorkerProfileClient({ id }: WorkerProfileClientProps) {
                 </div>
                 <div className="flex items-center gap-2.5">
                   <CheckCircle2 size={16} className="text-[#1FB863] shrink-0" />
-                  <span>Direct Customer Contact after Booking</span>
+                  <span>Direct In-App Voice Calling & Chat after Booking</span>
                 </div>
                 <div className="flex items-center gap-2.5">
                   <CheckCircle2 size={16} className="text-[#1FB863] shrink-0" />
@@ -315,7 +315,7 @@ export function WorkerProfileClient({ id }: WorkerProfileClientProps) {
               </button>
 
               <p className="text-[11px] text-[#666E7A] text-center font-medium">
-                Booking request worker ko pohnch jayegi aur wo aap se phone per rabta karenge.
+                Booking request worker ko pohnch jayegi. Aap app me direct voice call karsakte hain.
               </p>
             </div>
           </div>

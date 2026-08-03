@@ -1,4 +1,4 @@
-import { Category, Worker, Review, Booking } from './types';
+import { Category, Worker, Review, Booking, CallRecord, ChatMessage } from './types';
 
 export const INITIAL_CATEGORIES: Category[] = [
   {
@@ -429,3 +429,76 @@ export const INITIAL_BOOKINGS: Booking[] = [
     created_at: '2025-02-28T14:20:00Z',
   },
 ];
+
+export const INITIAL_CALLS: CallRecord[] = [
+  {
+    id: 'call-101',
+    booking_id: 'b-101',
+    caller_id: 'u-c1',
+    caller_name: 'Tariq M.',
+    caller_photo: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200',
+    caller_role: 'customer',
+    callee_id: 'w-1',
+    callee_name: 'Mohammad Tariq',
+    callee_photo: 'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=400',
+    callee_role: 'worker',
+    category: 'Electrician',
+    status: 'ended',
+    duration_seconds: 142,
+    created_at: '2025-02-19T10:05:00Z',
+  },
+  {
+    id: 'call-102',
+    booking_id: 'b-102',
+    caller_id: 'w-2',
+    caller_name: 'Zubair Ahmed',
+    caller_photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
+    caller_role: 'worker',
+    callee_id: 'u-c2',
+    callee_name: 'Amina K.',
+    callee_photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200',
+    callee_role: 'customer',
+    category: 'AC Technician',
+    status: 'ended',
+    duration_seconds: 98,
+    created_at: '2025-02-26T11:15:00Z',
+  },
+  {
+    id: 'call-103',
+    booking_id: 'b-103',
+    caller_id: 'u-c3',
+    caller_name: 'Usman Ali',
+    caller_photo: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200',
+    caller_role: 'customer',
+    callee_id: 'w-1',
+    callee_name: 'Mohammad Tariq',
+    callee_photo: 'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=400',
+    callee_role: 'worker',
+    category: 'Electrician',
+    status: 'missed',
+    duration_seconds: 0,
+    created_at: '2025-02-28T14:22:00Z',
+  },
+];
+
+export const INITIAL_CHAT_MESSAGES: ChatMessage[] = [
+  {
+    id: 'msg-1',
+    booking_id: 'b-101',
+    sender_id: 'u-c1',
+    sender_name: 'Tariq M.',
+    sender_role: 'customer',
+    text: 'Assalam-o-Alaikum Tariq Bhai, main ne UPS wiring ke liye booking ki hai.',
+    created_at: '2025-02-19T10:01:00Z',
+  },
+  {
+    id: 'msg-2',
+    booking_id: 'b-101',
+    sender_id: 'w-1',
+    sender_name: 'Mohammad Tariq',
+    sender_role: 'worker',
+    text: 'Walaikum Assalam! Ji main ne request dekh li hai. Main kal morning 10 baje aunga.',
+    created_at: '2025-02-19T10:03:00Z',
+  },
+];
+

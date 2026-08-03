@@ -120,7 +120,7 @@ export function BookingModal({ worker, isOpen, onClose, onBookingSuccess }: Book
 
               <div>
                 <label className="block text-xs font-bold text-[#0B0E12] font-heading mb-1.5">
-                  Phone Number (Rabta Number) *
+                  Phone Number (Account Recovery Only) *
                 </label>
                 <div className="relative">
                   <Phone size={16} className="absolute left-3.5 top-3.5 text-[#666E7A]" />
@@ -133,6 +133,9 @@ export function BookingModal({ worker, isOpen, onClose, onBookingSuccess }: Book
                     className="w-full pl-10 pr-3 py-3 text-xs rounded-xl border border-[#EAECE7] focus:outline-none focus:border-[#0B0E12] text-[#0B0E12] bg-[#F7F8F5] font-medium"
                   />
                 </div>
+                <p className="text-[10px] text-[#1FB863] font-bold mt-1">
+                  🔒 Kept strictly private for account recovery. Calls connect via WebRTC in-app calling without phone numbers.
+                </p>
               </div>
 
               <div>

@@ -1,10 +1,14 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { MapPin, Briefcase, ChevronRight } from 'lucide-react';
+import { MapPin, Briefcase, ChevronRight, Heart } from 'lucide-react';
 import { Worker } from '@/lib/types';
 import { VerifiedBadge } from './verified-badge';
 import { StarRating } from './star-rating';
 import { CategoryIcon } from './category-icon';
+import { getFavoriteWorkerIds, toggleFavoriteWorker } from '@/lib/store';
 
 interface WorkerCardProps {
   worker: Worker;
@@ -12,6 +16,20 @@ interface WorkerCardProps {
 }
 
 export function WorkerCard({ worker, onBookClick }: WorkerCardProps) {
+  const [isFavorite, setIsFavorite] = useState<boolean>(false);
+
+  useEffect(() => {
+    const favs = getFavoriteWorkerIds();
+    setIsFavorite(favs.includes(worker.id));
+  }, [worker.id]);
+
+  const handleToggleFavorite = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const updated = toggleFavoriteWorker(worker.id);
+    setIsFavorite(updated.includes(worker.id));
+  };
+
   return (
     <div className="bg-white rounded-[26px] border border-[#EAECE7] p-6 hover:-translate-y-1.5 hover:shadow-[0_16px_36px_rgba(11,14,18,0.08)] transition-all duration-200 flex flex-col justify-between h-full relative group">
       <div>
@@ -23,16 +41,31 @@ export function WorkerCard({ worker, onBookClick }: WorkerCardProps) {
             </span>
             {worker.category}
           </span>
-          <span
-            className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1.5 ${
-              worker.is_available
-                ? 'bg-[#D6F5E3] text-[#1FB863]'
-                : 'bg-[#FFE3EC] text-[#FF5F82]'
-            }`}
-          >
-            <span className={`w-1.5 h-1.5 rounded-full ${worker.is_available ? 'bg-[#1FB863] animate-pulse' : 'bg-[#FF5F82]'}`} />
-            {worker.is_available ? 'Available' : 'Busy'}
-          </span>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleToggleFavorite}
+              className={`p-1.5 rounded-full border transition ${
+                isFavorite
+                  ? 'bg-rose-50 border-rose-200 text-rose-500'
+                  : 'bg-gray-50 border-gray-200 text-gray-400 hover:text-rose-500 hover:bg-rose-50'
+              }`}
+              title={isFavorite ? 'Remove from Favorites' : 'Save to Favorites'}
+            >
+              <Heart size={14} className={isFavorite ? 'fill-rose-500' : ''} />
+            </button>
+
+            <span
+              className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1.5 ${
+                worker.is_available
+                  ? 'bg-[#D6F5E3] text-[#1FB863]'
+                  : 'bg-[#FFE3EC] text-[#FF5F82]'
+              }`}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${worker.is_available ? 'bg-[#1FB863] animate-pulse' : 'bg-[#FF5F82]'}`} />
+              {worker.is_available ? 'Available' : 'Busy'}
+            </span>
+          </div>
         </div>
 
         {/* Worker Header: Photo, Name, Verified */}

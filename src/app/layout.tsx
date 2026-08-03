@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
 import { PWARegister } from "@/components/pwa-register";
+import { CallProvider } from "@/components/call/call-provider";
 
 export const metadata: Metadata = {
   title: "Naya Kaam — Local Skilled Worker Marketplace Pakistan",
@@ -45,7 +46,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         />
       </head>
       <body className="antialiased min-h-screen bg-[#F7F8FA] text-[#1A1A1A] font-body selection:bg-[#1E5AA8] selection:text-white pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
-        {children}
+        <CallProvider>
+          {children}
+        </CallProvider>
         <PWARegister />
       </body>
     </html>

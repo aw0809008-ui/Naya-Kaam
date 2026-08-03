@@ -1,7 +1,7 @@
 'use client';
 
-import { Worker, Category, Booking, Review, User, BookingStatus, CommissionStatus } from './types';
-import { INITIAL_CATEGORIES, INITIAL_WORKERS, INITIAL_REVIEWS, INITIAL_BOOKINGS } from './initial-data';
+import { Worker, Category, Booking, Review, User, BookingStatus, CommissionStatus, CallRecord, ChatMessage, DisputeReport } from './types';
+import { INITIAL_CATEGORIES, INITIAL_WORKERS, INITIAL_REVIEWS, INITIAL_BOOKINGS, INITIAL_CALLS, INITIAL_CHAT_MESSAGES } from './initial-data';
 import { db, handleFirestoreError, OperationType } from './firebase';
 import { doc, setDoc, deleteDoc, getDocs, collection } from 'firebase/firestore';
 
@@ -11,6 +11,10 @@ const STORAGE_KEYS = {
   BOOKINGS: 'nayakaam_bookings_v1',
   REVIEWS: 'nayakaam_reviews_v1',
   CURRENT_USER: 'nayakaam_user_v1',
+  CALLS: 'nayakaam_calls_v1',
+  CHAT_MESSAGES: 'nayakaam_chats_v1',
+  FAVORITES: 'nayakaam_favorites_v1',
+  DISPUTES: 'nayakaam_disputes_v1',
 };
 
 // Helper to safely get from localStorage
@@ -49,6 +53,12 @@ export function initializeStore() {
   }
   if (!window.localStorage.getItem(STORAGE_KEYS.BOOKINGS)) {
     setStored(STORAGE_KEYS.BOOKINGS, INITIAL_BOOKINGS);
+  }
+  if (!window.localStorage.getItem(STORAGE_KEYS.CALLS)) {
+    setStored(STORAGE_KEYS.CALLS, INITIAL_CALLS);
+  }
+  if (!window.localStorage.getItem(STORAGE_KEYS.CHAT_MESSAGES)) {
+    setStored(STORAGE_KEYS.CHAT_MESSAGES, INITIAL_CHAT_MESSAGES);
   }
 }
 
@@ -209,8 +219,10 @@ export function createBooking(data: Omit<Booking, 'id' | 'created_at' | 'status'
 
 export function updateBookingStatus(bookingId: string, status: BookingStatus): Booking[] {
   const bookings = getBookings();
+  let targetBooking: Booking | undefined;
   const updated = bookings.map((b) => {
     if (b.id === bookingId) {
+      targetBooking = b;
       return {
         ...b,
         status,
@@ -226,6 +238,21 @@ export function updateBookingStatus(bookingId: string, status: BookingStatus): B
     setDoc(doc(db, 'bookings', bookingId), updatedBooking).catch((err) => {
       handleFirestoreError(err, OperationType.UPDATE, `bookings/${bookingId}`);
     });
+
+    // If job was completed, update worker's completed_jobs stat
+    if (status === 'completed' && targetBooking?.worker_id) {
+      const workers = getWorkers();
+      const updatedWorkers = workers.map((w) =>
+        w.id === targetBooking?.worker_id ? { ...w, completed_jobs: (w.completed_jobs || 0) + 1 } : w
+      );
+      setStored(STORAGE_KEYS.WORKERS, updatedWorkers);
+      const targetWorker = updatedWorkers.find((w) => w.id === targetBooking?.worker_id);
+      if (targetWorker) {
+        setDoc(doc(db, 'workers', targetWorker.id), targetWorker).catch((err) => {
+          handleFirestoreError(err, OperationType.UPDATE, `workers/${targetWorker.id}`);
+        });
+      }
+    }
   }
 
   return updated;
@@ -326,4 +353,99 @@ export function getCurrentUser(): User | null {
 export function setCurrentUser(user: User | null): void {
   setStored(STORAGE_KEYS.CURRENT_USER, user);
 }
+
+// --- VOICE CALL LOGS & REALTIME CALLS ---
+export function getCalls(): CallRecord[] {
+  return getStored<CallRecord[]>(STORAGE_KEYS.CALLS, INITIAL_CALLS);
+}
+
+export function saveCallRecord(call: CallRecord): CallRecord[] {
+  const calls = getCalls();
+  const existingIdx = calls.findIndex((c) => c.id === call.id);
+  let updated: CallRecord[];
+  if (existingIdx >= 0) {
+    updated = [...calls];
+    updated[existingIdx] = call;
+  } else {
+    updated = [call, ...calls];
+  }
+  setStored(STORAGE_KEYS.CALLS, updated);
+
+  // Firestore sync for calls
+  setDoc(doc(db, 'calls', call.id), call).catch((err) => {
+    handleFirestoreError(err, OperationType.WRITE, `calls/${call.id}`);
+  });
+
+  return updated;
+}
+
+export function getMissedCallsForUser(userId: string): CallRecord[] {
+  const calls = getCalls();
+  return calls.filter((c) => c.callee_id === userId && c.status === 'missed');
+}
+
+// --- BOOKING CHAT MESSAGES ---
+export function getChatMessages(): ChatMessage[] {
+  return getStored<ChatMessage[]>(STORAGE_KEYS.CHAT_MESSAGES, INITIAL_CHAT_MESSAGES);
+}
+
+export function getBookingChatMessages(bookingId: string): ChatMessage[] {
+  const msgs = getChatMessages();
+  return msgs.filter((m) => m.booking_id === bookingId).sort((a, b) => a.created_at.localeCompare(b.created_at));
+}
+
+export function sendChatMessage(msgData: Omit<ChatMessage, 'id' | 'created_at'>): ChatMessage {
+  const msgs = getChatMessages();
+  const newMsg: ChatMessage = {
+    ...msgData,
+    id: `msg-${Date.now()}`,
+    created_at: new Date().toISOString(),
+  };
+  const updated = [...msgs, newMsg];
+  setStored(STORAGE_KEYS.CHAT_MESSAGES, updated);
+
+  setDoc(doc(db, 'chats', newMsg.id), newMsg).catch((err) => {
+    handleFirestoreError(err, OperationType.CREATE, `chats/${newMsg.id}`);
+  });
+
+  return newMsg;
+}
+
+// --- FAVORITE WORKERS ---
+export function getFavoriteWorkerIds(): string[] {
+  return getStored<string[]>(STORAGE_KEYS.FAVORITES, []);
+}
+
+export function toggleFavoriteWorker(workerId: string): string[] {
+  const favorites = getFavoriteWorkerIds();
+  const exists = favorites.includes(workerId);
+  const updated = exists ? favorites.filter((id) => id !== workerId) : [...favorites, workerId];
+  setStored(STORAGE_KEYS.FAVORITES, updated);
+  return updated;
+}
+
+// --- DISPUTES / REPORTS ---
+export function getDisputeReports(): DisputeReport[] {
+  return getStored<DisputeReport[]>(STORAGE_KEYS.DISPUTES, []);
+}
+
+export function createDisputeReport(data: Omit<DisputeReport, 'id' | 'created_at' | 'status'>): DisputeReport {
+  const reports = getDisputeReports();
+  const newReport: DisputeReport = {
+    ...data,
+    id: `disp-${Date.now()}`,
+    status: 'open',
+    created_at: new Date().toISOString(),
+  };
+  const updated = [newReport, ...reports];
+  setStored(STORAGE_KEYS.DISPUTES, updated);
+
+  setDoc(doc(db, 'disputes', newReport.id), newReport).catch((err) => {
+    handleFirestoreError(err, OperationType.CREATE, `disputes/${newReport.id}`);
+  });
+
+  return newReport;
+}
+
+
 

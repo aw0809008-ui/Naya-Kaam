@@ -141,6 +141,14 @@ export function Navbar() {
                     <ShieldAlert size={14} className="text-amber-600" />
                     <span>Admin Panel</span>
                   </button>
+                  <Link
+                    href="/admin/calls"
+                    onClick={() => setRoleDropdownOpen(false)}
+                    className="w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center gap-2 text-[#0B0E12] font-semibold transition"
+                  >
+                    <Sparkles size={14} className="text-[#1FB863]" />
+                    <span>In-App Call Logs</span>
+                  </Link>
                 </div>
               )}
             </div>

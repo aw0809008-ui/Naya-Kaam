@@ -6,6 +6,10 @@ import Link from 'next/link';
 import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
 import { ReviewModal } from '@/components/review-modal';
+import { BookingChatModal } from '@/components/booking-chat-modal';
+import { DisputeModal } from '@/components/dispute-modal';
+import { BookingModal } from '@/components/booking-modal';
+import { useCall } from '@/components/call/call-provider';
 import { VerifiedBadge } from '@/components/verified-badge';
 import { StarRating } from '@/components/star-rating';
 import {
@@ -18,6 +22,7 @@ import {
   saveWorker,
   updateBookingStatus,
   initializeStore,
+  getWorkers,
 } from '@/lib/store';
 import { User, Booking, Worker, BookingStatus } from '@/lib/types';
 import {
@@ -34,13 +39,21 @@ import {
   Edit3,
   TrendingUp,
   Phone,
+  PhoneCall,
+  MessageSquare,
+  ShieldCheck,
   ThumbsUp,
   Sparkles,
   ToggleLeft,
   ToggleRight,
+  AlertTriangle,
+  RotateCcw,
 } from 'lucide-react';
 
 export default function DashboardPage() {
+  const { initiateCall } = useCall();
+  const [selectedChatBooking, setSelectedChatBooking] = useState<Booking | null>(null);
+
   const [currentUser, setUserState] = useState<User | null>(() => {
     initializeStore();
     return getCurrentUser();
@@ -57,6 +70,8 @@ export default function DashboardPage() {
   });
   const [customerTab, setCustomerTab] = useState<'active' | 'completed' | 'cancelled'>('active');
   const [selectedBookingForReview, setSelectedBookingForReview] = useState<Booking | null>(null);
+  const [selectedBookingForDispute, setSelectedBookingForDispute] = useState<Booking | null>(null);
+  const [selectedWorkerForRepeat, setSelectedWorkerForRepeat] = useState<Worker | null>(null);
 
   // Worker state
   const [workerObj, setWorkerObj] = useState<Worker | null>(() => getWorkerById('w-1') || null);
@@ -295,48 +310,97 @@ export default function DashboardPage() {
                           <span>Address: </span>
                           <span className="font-medium text-[#1A1A1A] truncate">{booking.address}</span>
                         </div>
-                        {booking.worker_phone && (
-                          <div className="flex items-center gap-2">
-                            <Phone size={14} className="text-emerald-600" />
-                            <span>Worker Phone: </span>
-                            <span className="font-bold text-emerald-700">{booking.worker_phone}</span>
-                          </div>
-                        )}
+                        <div className="flex items-center gap-1.5 pt-1">
+                          <span className="text-[11px] text-[#1FB863] font-bold flex items-center gap-1 bg-[#D6F5E3] px-2.5 py-1 rounded-lg border border-[#1FB863]/20">
+                            <ShieldCheck size={13} /> In-App Calling Enabled (No Phone Number Shared)
+                          </span>
+                        </div>
                         <p className="bg-[#F7F8FA] p-3 rounded-xl border border-[#E5E7EB] italic text-[#1A1A1A]">
                           &ldquo;{booking.description}&rdquo;
                         </p>
                       </div>
 
                       {/* Footer Actions */}
-                      <div className="pt-3 border-t border-[#E5E7EB] flex items-center justify-between">
+                      <div className="pt-3 border-t border-[#E5E7EB] flex flex-wrap items-center justify-between gap-2">
                         <span className="text-xs font-bold text-[#1E5AA8]">
                           Estimated: Rs. {booking.booking_amount.toLocaleString()}
                         </span>
 
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                          {booking.status !== 'cancelled' && (
+                            <>
+                              <button
+                                onClick={() =>
+                                  initiateCall({
+                                    bookingId: booking.id,
+                                    calleeId: booking.worker_id,
+                                    calleeName: booking.worker_name,
+                                    calleePhoto: booking.worker_photo,
+                                    calleeRole: 'worker',
+                                    category: booking.category,
+                                  })
+                                }
+                                className="px-3.5 py-1.5 rounded-[10px] text-xs font-bold text-white bg-[#1FB863] hover:bg-[#189d53] transition flex items-center gap-1.5 shadow-xs"
+                                title="In-App Voice Call"
+                              >
+                                <PhoneCall size={14} />
+                                <span>Call</span>
+                              </button>
+
+                              <button
+                                onClick={() => setSelectedChatBooking(booking)}
+                                className="px-3.5 py-1.5 rounded-[10px] text-xs font-bold text-white bg-[#0B0E12] hover:bg-gray-800 transition flex items-center gap-1.5 shadow-xs"
+                                title="Chat Messages"
+                              >
+                                <MessageSquare size={14} />
+                                <span>Chat</span>
+                              </button>
+                            </>
+                          )}
+
                           {booking.status === 'pending' && (
                             <button
                               onClick={() => handleStatusChange(booking.id, 'cancelled')}
-                              className="px-3.5 py-1.5 rounded-[10px] text-xs font-semibold text-red-600 border border-red-200 hover:bg-red-50 transition"
+                              className="px-3 py-1.5 rounded-[10px] text-xs font-semibold text-red-600 border border-red-200 hover:bg-red-50 transition"
                             >
-                              Cancel Booking
+                              Cancel
                             </button>
                           )}
 
-                          {booking.status === 'completed' && !booking.has_review && (
+                          {booking.status === 'completed' && (
+                            <>
+                              {!booking.has_review && (
+                                <button
+                                  onClick={() => setSelectedBookingForReview(booking)}
+                                  className="px-3.5 py-1.5 rounded-[10px] text-xs font-semibold text-white bg-[#F5820D] hover:bg-[#D97109] transition flex items-center gap-1 shadow-xs"
+                                >
+                                  <ThumbsUp size={13} />
+                                  <span>Review</span>
+                                </button>
+                              )}
+
+                              <button
+                                onClick={() => {
+                                  const worker = getWorkerById(booking.worker_id);
+                                  if (worker) setSelectedWorkerForRepeat(worker);
+                                }}
+                                className="px-3 py-1.5 rounded-[10px] text-xs font-bold text-white bg-[#1FB863] hover:bg-[#189d53] transition flex items-center gap-1 shadow-xs"
+                              >
+                                <RotateCcw size={13} />
+                                <span>Book Again</span>
+                              </button>
+                            </>
+                          )}
+
+                          {booking.status !== 'pending' && (
                             <button
-                              onClick={() => setSelectedBookingForReview(booking)}
-                              className="px-3.5 py-1.5 rounded-[10px] text-xs font-semibold text-white bg-[#F5820D] hover:bg-[#D97109] transition flex items-center gap-1 shadow-xs"
+                              onClick={() => setSelectedBookingForDispute(booking)}
+                              className="px-2.5 py-1.5 rounded-[10px] text-[11px] font-semibold text-gray-500 border border-gray-200 hover:bg-gray-100 hover:text-red-600 transition flex items-center gap-1"
+                              title="Report Issue to Admin"
                             >
-                              <ThumbsUp size={13} />
-                              <span>Leave Review</span>
+                              <AlertTriangle size={12} />
+                              <span>Report</span>
                             </button>
-                          )}
-
-                          {booking.status === 'completed' && booking.has_review && (
-                            <span className="text-xs text-emerald-700 font-semibold flex items-center gap-1">
-                              <CheckCircle2 size={14} /> Reviewed
-                            </span>
                           )}
                         </div>
                       </div>
@@ -479,10 +543,10 @@ export default function DashboardPage() {
                         </div>
 
                         <div className="space-y-2 text-xs text-[#6B7280] font-body">
-                          <div className="flex items-center gap-2">
-                            <Phone size={14} className="text-[#6B7280]" />
-                            <span>Customer Phone: </span>
-                            <span className="font-bold text-[#1A1A1A]">{req.customer_phone}</span>
+                          <div className="flex items-center gap-1.5 pt-1">
+                            <span className="text-[11px] text-[#1FB863] font-bold flex items-center gap-1 bg-[#D6F5E3] px-2.5 py-1 rounded-lg border border-[#1FB863]/20">
+                              <ShieldCheck size={13} /> In-App Voice Call Enabled
+                            </span>
                           </div>
                           <div className="flex items-center gap-2">
                             <Calendar size={14} className="text-[#6B7280]" />
@@ -499,19 +563,47 @@ export default function DashboardPage() {
                           </p>
                         </div>
 
-                        <div className="pt-3 border-t border-[#E5E7EB] flex gap-3">
-                          <button
-                            onClick={() => handleStatusChange(req.id, 'cancelled')}
-                            className="flex-1 py-2.5 rounded-[10px] border border-[#E5E7EB] text-[#1A1A1A] text-xs font-semibold hover:bg-gray-50 transition"
-                          >
-                            Decline Request
-                          </button>
-                          <button
-                            onClick={() => handleStatusChange(req.id, 'accepted')}
-                            className="flex-1 py-2.5 rounded-[10px] bg-[#F5820D] hover:bg-[#D97109] text-white text-xs font-semibold transition shadow-xs"
-                          >
-                            Accept Request
-                          </button>
+                        <div className="pt-3 border-t border-[#E5E7EB] space-y-2">
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() =>
+                                initiateCall({
+                                  bookingId: req.id,
+                                  calleeId: req.customer_id,
+                                  calleeName: req.customer_name,
+                                  calleePhoto: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200',
+                                  calleeRole: 'customer',
+                                  category: req.category,
+                                })
+                              }
+                              className="flex-1 py-2 rounded-[10px] bg-[#1FB863] hover:bg-[#189d53] text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs"
+                            >
+                              <PhoneCall size={14} />
+                              <span>Call Customer</span>
+                            </button>
+                            <button
+                              onClick={() => setSelectedChatBooking(req)}
+                              className="flex-1 py-2 rounded-[10px] bg-[#0B0E12] hover:bg-gray-800 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs"
+                            >
+                              <MessageSquare size={14} />
+                              <span>Chat</span>
+                            </button>
+                          </div>
+
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleStatusChange(req.id, 'cancelled')}
+                              className="flex-1 py-2 rounded-[10px] border border-[#E5E7EB] text-[#1A1A1A] text-xs font-semibold hover:bg-gray-50 transition"
+                            >
+                              Decline
+                            </button>
+                            <button
+                              onClick={() => handleStatusChange(req.id, 'accepted')}
+                              className="flex-1 py-2 rounded-[10px] bg-[#F5820D] hover:bg-[#D97109] text-white text-xs font-semibold transition shadow-xs"
+                            >
+                              Accept Job
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -549,10 +641,10 @@ export default function DashboardPage() {
                         </div>
 
                         <div className="space-y-2 text-xs text-[#6B7280] font-body">
-                          <div className="flex items-center gap-2">
-                            <Phone size={14} className="text-emerald-600" />
-                            <span>Contact Customer: </span>
-                            <span className="font-bold text-[#1A1A1A]">{job.customer_phone}</span>
+                          <div className="flex items-center gap-1.5 pt-1">
+                            <span className="text-[11px] text-[#1FB863] font-bold flex items-center gap-1 bg-[#D6F5E3] px-2.5 py-1 rounded-lg border border-[#1FB863]/20">
+                              <ShieldCheck size={13} /> In-App Audio Call Enabled
+                            </span>
                           </div>
                           <div className="flex items-center gap-2">
                             <Calendar size={14} className="text-[#6B7280]" />
@@ -566,13 +658,41 @@ export default function DashboardPage() {
                           </div>
                         </div>
 
-                        <button
-                          onClick={() => handleStatusChange(job.id, 'completed')}
-                          className="w-full py-3 rounded-[10px] bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition shadow-xs flex items-center justify-center gap-1.5"
-                        >
-                          <CheckCircle2 size={16} />
-                          <span>Mark as Completed</span>
-                        </button>
+                        <div className="space-y-2 pt-2 border-t border-[#E5E7EB]">
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() =>
+                                initiateCall({
+                                  bookingId: job.id,
+                                  calleeId: job.customer_id,
+                                  calleeName: job.customer_name,
+                                  calleePhoto: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200',
+                                  calleeRole: 'customer',
+                                  category: job.category,
+                                })
+                              }
+                              className="flex-1 py-2.5 rounded-[10px] bg-[#1FB863] hover:bg-[#189d53] text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs"
+                            >
+                              <PhoneCall size={14} />
+                              <span>Call Customer</span>
+                            </button>
+                            <button
+                              onClick={() => setSelectedChatBooking(job)}
+                              className="flex-1 py-2.5 rounded-[10px] bg-[#0B0E12] hover:bg-gray-800 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs"
+                            >
+                              <MessageSquare size={14} />
+                              <span>Chat</span>
+                            </button>
+                          </div>
+
+                          <button
+                            onClick={() => handleStatusChange(job.id, 'completed')}
+                            className="w-full py-2.5 rounded-[10px] bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition shadow-xs flex items-center justify-center gap-1.5"
+                          >
+                            <CheckCircle2 size={16} />
+                            <span>Mark as Completed</span>
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -722,6 +842,26 @@ export default function DashboardPage() {
         isOpen={!!selectedBookingForReview}
         onClose={() => setSelectedBookingForReview(null)}
         onReviewSubmitted={() => refreshData(activeViewRole)}
+      />
+
+      <DisputeModal
+        booking={selectedBookingForDispute}
+        isOpen={!!selectedBookingForDispute}
+        onClose={() => setSelectedBookingForDispute(null)}
+        onReportSubmitted={() => refreshData(activeViewRole)}
+      />
+
+      <BookingChatModal
+        booking={selectedChatBooking}
+        isOpen={!!selectedChatBooking}
+        onClose={() => setSelectedChatBooking(null)}
+      />
+
+      <BookingModal
+        worker={selectedWorkerForRepeat}
+        isOpen={!!selectedWorkerForRepeat}
+        onClose={() => setSelectedWorkerForRepeat(null)}
+        onBookingCreated={() => refreshData('customer')}
       />
     </div>
   );

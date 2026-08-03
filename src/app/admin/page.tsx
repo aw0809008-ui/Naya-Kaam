@@ -13,8 +13,10 @@ import {
   verifyWorkerCNIC,
   updateBookingStatus,
   initializeStore,
+  getCurrentUser,
+  getDisputeReports,
 } from '@/lib/store';
-import { Worker, Booking } from '@/lib/types';
+import { Worker, Booking, DisputeReport } from '@/lib/types';
 import {
   ShieldAlert,
   CheckCircle2,
@@ -29,17 +31,46 @@ import {
   X,
   Eye,
   ArrowRight,
+  PhoneCall,
+  Lock,
+  Key,
+  AlertTriangle,
 } from 'lucide-react';
 
 export default function AdminPage() {
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const user = getCurrentUser();
+      if (user?.role === 'admin') return true;
+      return localStorage.getItem('nayakaam_admin_session') === 'true';
+    }
+    return false;
+  });
+  const [passkeyInput, setPasskeyInput] = useState('');
+  const [passkeyError, setPasskeyError] = useState('');
+
   const [workers, setWorkers] = useState<Worker[]>(() => {
     initializeStore();
     return getWorkers();
   });
   const [bookings, setBookings] = useState<Booking[]>(() => getBookings());
+  const [disputes, setDisputes] = useState<DisputeReport[]>(() => getDisputeReports());
 
-  const [activeTab, setActiveTab] = useState<'verifications' | 'workers' | 'bookings' | 'commission'>('verifications');
+  const [activeTab, setActiveTab] = useState<'verifications' | 'workers' | 'bookings' | 'commission' | 'disputes'>('verifications');
   const [selectedCnicWorker, setSelectedCnicWorker] = useState<Worker | null>(null);
+
+  const handleAdminLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passkeyInput === '7860' || passkeyInput === 'admin123') {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('nayakaam_admin_session', 'true');
+      }
+      setIsAdminAuthenticated(true);
+      setPasskeyError('');
+    } else {
+      setPasskeyError('Ghalat Passkey! Please enter the correct admin access key.');
+    }
+  };
 
   const refreshData = useCallback(() => {
     setWorkers(getWorkers());
@@ -64,6 +95,65 @@ export default function AdminPage() {
   const completedBookings = bookings.filter((b) => b.status === 'completed');
   const totalPlatformRevenue = completedBookings.reduce((sum, b) => sum + b.commission_amount, 0);
 
+  if (!isAdminAuthenticated) {
+    return (
+      <div className="min-h-screen flex flex-col bg-[#F7F8FA] font-body">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center p-4 my-12">
+          <div className="bg-white rounded-2xl p-8 border border-[#E5E7EB] shadow-xl max-w-md w-full">
+            <div className="text-center mb-6">
+              <div className="w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-amber-200">
+                <Lock size={28} />
+              </div>
+              <h2 className="text-xl font-heading font-bold text-[#1A1A1A]">Admin Access Restricted</h2>
+              <p className="text-xs text-[#6B7280] mt-1">
+                Please enter the Naya Kaam Administrator passkey to access NADRA verification & commission controls.
+              </p>
+            </div>
+
+            <form onSubmit={handleAdminLogin} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-[#1A1A1A] mb-1.5">
+                  Admin Access Passkey
+                </label>
+                <div className="relative">
+                  <Key size={16} className="absolute left-3.5 top-3.5 text-gray-400" />
+                  <input
+                    type="password"
+                    value={passkeyInput}
+                    onChange={(e) => setPasskeyInput(e.target.value)}
+                    placeholder="Enter passkey (Default: 7860)"
+                    className="w-full pl-10 pr-4 py-3 text-sm rounded-xl border border-gray-200 focus:outline-none focus:border-[#F5820D] bg-gray-50 font-medium"
+                    required
+                  />
+                </div>
+                {passkeyError && (
+                  <p className="text-xs text-red-600 mt-2 font-medium flex items-center gap-1">
+                    <AlertTriangle size={13} /> {passkeyError}
+                  </p>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3 bg-[#0B0E12] hover:bg-gray-800 text-white text-xs font-bold rounded-xl transition shadow-md"
+              >
+                Unlock Administrator Console
+              </button>
+            </form>
+
+            <div className="mt-6 pt-4 border-t border-gray-100 text-center">
+              <p className="text-[11px] text-gray-400 font-medium">
+                Tip: Default demo passkey is <span className="font-bold text-gray-700">7860</span> or <span className="font-bold text-gray-700">admin123</span>
+              </p>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-[#F7F8FA] font-body">
       <Navbar />
@@ -82,6 +172,13 @@ export default function AdminPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            <Link
+              href="/admin/calls"
+              className="px-4 py-2.5 rounded-[10px] bg-[#1FB863] hover:bg-[#189d53] text-xs font-bold text-white transition flex items-center gap-1.5 shadow-md"
+            >
+              <PhoneCall size={14} />
+              <span>In-App Call History (/admin/calls)</span>
+            </Link>
             <button
               onClick={() => refreshData()}
               className="px-4 py-2.5 rounded-[10px] bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition border border-white/20 backdrop-blur-md"
@@ -181,6 +278,16 @@ export default function AdminPage() {
             }`}
           >
             Commission Revenue Ledger
+          </button>
+          <button
+            onClick={() => setActiveTab('disputes')}
+            className={`pb-3 border-b-2 transition whitespace-nowrap ${
+              activeTab === 'disputes'
+                ? 'border-[#1E5AA8] text-[#1E5AA8]'
+                : 'border-transparent text-[#6B7280] hover:text-[#1A1A1A]'
+            }`}
+          >
+            Disputes & Reports ({disputes.length})
           </button>
         </div>
 
@@ -449,6 +556,47 @@ export default function AdminPage() {
                 </tbody>
               </table>
             </div>
+          </div>
+        )}
+
+        {/* TAB 5: Disputes & Reports */}
+        {activeTab === 'disputes' && (
+          <div className="bg-white rounded-2xl border border-[#E5E7EB] p-6 shadow-xs space-y-4">
+            <h3 className="font-heading font-bold text-base text-[#1A1A1A] flex items-center gap-2">
+              <AlertTriangle className="text-amber-500" size={18} /> Customer & Worker Dispute Cases
+            </h3>
+
+            {disputes.length > 0 ? (
+              <div className="space-y-3">
+                {disputes.map((disp) => (
+                  <div key={disp.id} className="p-4 rounded-xl border border-gray-200 bg-gray-50/50 space-y-2">
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-200 pb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-[#0B0E12]">{disp.reporter_name} ({disp.reporter_role})</span>
+                        <span className="text-xs text-gray-400">reported</span>
+                        <span className="text-xs font-bold text-red-600">{disp.reported_user_name}</span>
+                      </div>
+                      <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
+                        {disp.issue_category.replace('_', ' ')}
+                      </span>
+                    </div>
+
+                    <p className="text-xs text-gray-700 font-body">
+                      <strong className="text-gray-900">Reason:</strong> {disp.reason}
+                    </p>
+
+                    <div className="flex items-center justify-between pt-1 text-[11px] text-gray-500">
+                      <span>Booking ID: <strong className="text-gray-700">{disp.booking_id}</strong></span>
+                      <span>Filed: {new Date(disp.created_at).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-8 text-center text-gray-400 text-xs">
+                No dispute or complaint reports filed yet.
+              </div>
+            )}
           </div>
         )}
       </div>
