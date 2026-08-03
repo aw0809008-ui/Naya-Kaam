@@ -16,12 +16,9 @@ interface WorkerCardProps {
 }
 
 export function WorkerCard({ worker, onBookClick }: WorkerCardProps) {
-  const [isFavorite, setIsFavorite] = useState<boolean>(false);
-
-  useEffect(() => {
-    const favs = getFavoriteWorkerIds();
-    setIsFavorite(favs.includes(worker.id));
-  }, [worker.id]);
+  const [isFavorite, setIsFavorite] = useState<boolean>(() => {
+    return getFavoriteWorkerIds().includes(worker.id);
+  });
 
   const handleToggleFavorite = (e: React.MouseEvent) => {
     e.preventDefault();

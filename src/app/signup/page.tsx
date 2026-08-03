@@ -5,8 +5,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
-import { setCurrentUser } from '@/lib/store';
-import { Wrench, Phone, User, Lock, MapPin, ArrowRight } from 'lucide-react';
+import { setCurrentUser, checkDeviceSignupRateLimit, recordDeviceSignup } from '@/lib/store';
+import { CaptchaChallenge } from '@/components/ui/captcha-challenge';
+import { Wrench, Phone, User, Lock, MapPin, ArrowRight, AlertTriangle } from 'lucide-react';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -14,10 +15,32 @@ export default function SignupPage() {
   const [phone, setPhone] = useState('');
   const [city, setCity] = useState('Karachi');
   const [password, setPassword] = useState('');
+  const [agreedTerms, setAgreedTerms] = useState(false);
+  const [isCaptchaValid, setIsCaptchaValid] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage('');
+
     if (!name || !phone) return;
+
+    if (!agreedTerms) {
+      setErrorMessage('Baraye meherbani Terms & Conditions aur Privacy Policy ko qabool karein.');
+      return;
+    }
+
+    if (!isCaptchaValid) {
+      setErrorMessage('Security verification (Bot check) ka sahi jawab likhein.');
+      return;
+    }
+
+    if (!checkDeviceSignupRateLimit()) {
+      setErrorMessage('Is device se zyada accounts create karne ki limit (3 per hour) poori ho chuki hai. Baad mein koshish karein.');
+      return;
+    }
+
+    recordDeviceSignup();
 
     setCurrentUser({
       id: `u-c-${Date.now()}`,
@@ -28,6 +51,7 @@ export default function SignupPage() {
       city,
       created_at: new Date().toISOString(),
     });
+
     router.push('/dashboard');
   };
 
@@ -48,6 +72,13 @@ export default function SignupPage() {
               Create a customer account to book verified skilled workers
             </p>
           </div>
+
+          {errorMessage && (
+            <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl flex items-center gap-2 text-rose-700 text-xs font-semibold">
+              <AlertTriangle size={16} className="shrink-0" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
 
           <form onSubmit={handleSignup} className="space-y-4">
             <div>
@@ -121,9 +152,34 @@ export default function SignupPage() {
               </div>
             </div>
 
+            {/* Captcha */}
+            <CaptchaChallenge onVerify={(isValid) => setIsCaptchaValid(isValid)} />
+
+            {/* Terms Checkbox */}
+            <div className="flex items-start gap-2 pt-1">
+              <input
+                type="checkbox"
+                id="terms"
+                checked={agreedTerms}
+                onChange={(e) => setAgreedTerms(e.target.checked)}
+                className="mt-0.5 rounded border-[#EAECE7] text-[#0B0E12] focus:ring-0 cursor-pointer"
+              />
+              <label htmlFor="terms" className="text-xs text-[#666E7A] font-medium leading-tight cursor-pointer">
+                I agree to the{' '}
+                <Link href="/terms" target="_blank" className="text-[#0B0E12] font-bold underline hover:text-[#1FB863]">
+                  Terms & Conditions
+                </Link>{' '}
+                and{' '}
+                <Link href="/privacy" target="_blank" className="text-[#0B0E12] font-bold underline hover:text-[#1FB863]">
+                  Privacy Policy
+                </Link>
+              </label>
+            </div>
+
             <button
               type="submit"
-              className="btn btn-lime w-full py-3.5 text-xs font-extrabold mt-2"
+              disabled={!agreedTerms || !isCaptchaValid}
+              className="btn btn-lime w-full py-3.5 text-xs font-extrabold mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span>Create Customer Account</span>
               <ArrowRight size={16} />

@@ -848,7 +848,7 @@ export default function DashboardPage() {
         booking={selectedBookingForDispute}
         isOpen={!!selectedBookingForDispute}
         onClose={() => setSelectedBookingForDispute(null)}
-        onReportSubmitted={() => refreshData(activeViewRole)}
+        onSubmitted={() => refreshData(activeViewRole)}
       />
 
       <BookingChatModal

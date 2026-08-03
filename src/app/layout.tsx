@@ -3,6 +3,9 @@ import type { ReactNode } from "react";
 import "./globals.css";
 import { PWARegister } from "@/components/pwa-register";
 import { CallProvider } from "@/components/call/call-provider";
+import { ToastProvider } from "@/components/ui/toast";
+import { OfflineBanner } from "@/components/ui/offline-banner";
+import { NotificationPermissionModal } from "@/components/notifications/notification-permission-modal";
 
 export const metadata: Metadata = {
   title: "Naya Kaam — Local Skilled Worker Marketplace Pakistan",
@@ -28,6 +31,8 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
+import { ErrorBoundary } from "@/components/error-boundary";
+
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className="light">
@@ -46,10 +51,16 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         />
       </head>
       <body className="antialiased min-h-screen bg-[#F7F8FA] text-[#1A1A1A] font-body selection:bg-[#1E5AA8] selection:text-white pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
-        <CallProvider>
-          {children}
-        </CallProvider>
-        <PWARegister />
+        <ErrorBoundary>
+          <ToastProvider>
+            <OfflineBanner />
+            <CallProvider>
+              {children}
+            </CallProvider>
+            <NotificationPermissionModal />
+            <PWARegister />
+          </ToastProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );

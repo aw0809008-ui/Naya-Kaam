@@ -161,6 +161,31 @@ export function BookingChatModal({ booking, isOpen, onClose }: BookingChatModalP
           ) : (
             messages.map((msg) => {
               const isMine = msg.sender_id === currentUser?.id;
+              const isMissedCall = msg.text.includes('Missed In-App Voice Call') || msg.text.includes('Missed');
+
+              if (isMissedCall) {
+                return (
+                  <div key={msg.id} className="w-full flex justify-center my-2">
+                    <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3 max-w-xs w-full text-center space-y-2 shadow-xs">
+                      <div className="flex items-center justify-center gap-1.5 text-amber-700 font-bold text-xs">
+                        <PhoneCall size={14} className="text-amber-600" />
+                        <span>{msg.text}</span>
+                      </div>
+                      <p className="text-[10px] text-amber-600 font-medium">
+                        {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                      <button
+                        onClick={handleStartCall}
+                        className="w-full py-1.5 px-3 bg-amber-600 hover:bg-amber-700 active:scale-95 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition shadow-2xs"
+                      >
+                        <PhoneCall size={13} />
+                        <span>Call Back Now</span>
+                      </button>
+                    </div>
+                  </div>
+                );
+              }
+
               return (
                 <div
                   key={msg.id}

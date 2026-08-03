@@ -2,7 +2,9 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { CallRecord, User } from '@/lib/types';
-import { getCurrentUser, saveCallRecord, getCalls } from '@/lib/store';
+import { getCurrentUser, saveCallRecord, getCalls, recordMissedCallChatMessage } from '@/lib/store';
+import { notifyIncomingCall } from '@/lib/notifications';
+import { ringtone } from '@/lib/ringtone';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, query, where, doc, updateDoc } from 'firebase/firestore';
 import { VoiceCallOverlay } from './voice-call-overlay';
@@ -51,6 +53,16 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Ringtone synthesizer for incoming call
+  useEffect(() => {
+    if (incomingCall && !activeCall) {
+      ringtone.startRinging();
+    } else {
+      ringtone.stopRinging();
+    }
+    return () => ringtone.stopRinging();
+  }, [incomingCall, activeCall]);
+
   // Listen for incoming calls in Firestore
   useEffect(() => {
     if (!currentUser?.id) return;
@@ -68,15 +80,8 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
           if (callData.status === 'offering' && (!activeCall || activeCall.id !== callData.id)) {
             setIncomingCall(callData);
 
-            // Trigger PWA push/system notification if permitted
-            if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-              try {
-                new Notification(`Incoming Call from ${callData.caller_name}`, {
-                  body: `In-App Voice Call regarding booking ${callData.category || ''}`,
-                  icon: callData.caller_photo || '/favicon.ico',
-                });
-              } catch {}
-            }
+            // Trigger push notification
+            notifyIncomingCall(callData.callee_id, callData.caller_name, callData.category, callData.id).catch(() => {});
           }
         }
       });
@@ -109,12 +114,16 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
       saveCallRecord(newCall);
       setActiveCall(newCall);
       setIsCaller(true);
+
+      // Trigger high priority call push notification
+      notifyIncomingCall(params.calleeId, user?.name || 'Customer', params.category, newCall.id).catch(() => {});
     },
     []
   );
 
   const acceptIncomingCall = useCallback(() => {
     if (!incomingCall) return;
+    ringtone.stopRinging();
     const acceptedCall = { ...incomingCall, status: 'connected' as const };
     setActiveCall(acceptedCall);
     setIsCaller(false);
@@ -123,6 +132,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
 
   const declineIncomingCall = useCallback(async () => {
     if (!incomingCall) return;
+    ringtone.stopRinging();
     const missed: CallRecord = {
       ...incomingCall,
       status: 'missed',
@@ -131,6 +141,13 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
     saveCallRecord(missed);
     setIncomingCall(null);
     setMissedCallNotice(missed);
+
+    // Record missed call in booking chat thread
+    recordMissedCallChatMessage(
+      incomingCall.booking_id,
+      incomingCall.caller_name,
+      incomingCall.caller_role
+    );
 
     try {
       await updateDoc(doc(db, 'calls', incomingCall.id), {
@@ -141,6 +158,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
   }, [incomingCall]);
 
   const endActiveCall = useCallback(() => {
+    ringtone.stopRinging();
     setActiveCall(null);
   }, []);
 

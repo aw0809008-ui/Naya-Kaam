@@ -171,19 +171,33 @@ export default function AdminPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/admin/health-check"
+              className="px-3.5 py-2 rounded-[10px] bg-[#39E07A] hover:bg-[#2fc468] text-xs font-bold text-[#0B0E12] transition flex items-center gap-1.5 shadow-md"
+            >
+              <FileCheck size={14} />
+              <span>Pre-Launch Health Check</span>
+            </Link>
+            <Link
+              href="/admin/disputes"
+              className="px-3.5 py-2 rounded-[10px] bg-rose-600 hover:bg-rose-700 text-xs font-bold text-white transition flex items-center gap-1.5 shadow-md"
+            >
+              <AlertTriangle size={14} />
+              <span>Disputes Console</span>
+            </Link>
             <Link
               href="/admin/calls"
-              className="px-4 py-2.5 rounded-[10px] bg-[#1FB863] hover:bg-[#189d53] text-xs font-bold text-white transition flex items-center gap-1.5 shadow-md"
+              className="px-3.5 py-2 rounded-[10px] bg-[#1FB863] hover:bg-[#189d53] text-xs font-bold text-white transition flex items-center gap-1.5 shadow-md"
             >
               <PhoneCall size={14} />
-              <span>In-App Call History (/admin/calls)</span>
+              <span>Call Log</span>
             </Link>
             <button
               onClick={() => refreshData()}
-              className="px-4 py-2.5 rounded-[10px] bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition border border-white/20 backdrop-blur-md"
+              className="px-3.5 py-2 rounded-[10px] bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition border border-white/20 backdrop-blur-md"
             >
-              Refresh Data
+              Refresh
             </button>
           </div>
         </div>

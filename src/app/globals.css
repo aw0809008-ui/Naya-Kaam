@@ -188,6 +188,43 @@
   z-index: 10;
 }
 
+/* Custom Keyframe Animations */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+/* Touch active scale feedback for buttons and cards */
+.touch-active {
+  -webkit-tap-highlight-color: transparent;
+}
+.touch-active:active {
+  transform: scale(0.97);
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

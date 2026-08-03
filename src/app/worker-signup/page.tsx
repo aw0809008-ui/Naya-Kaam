@@ -4,8 +4,9 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
-import { getCategories, saveWorker, setCurrentUser } from '@/lib/store';
-import { Worker, Category } from '@/lib/types';
+import { getCategories, saveWorker, setCurrentUser, checkDeviceSignupRateLimit, recordDeviceSignup } from '@/lib/store';
+import { CaptchaChallenge } from '@/components/ui/captcha-challenge';
+import Link from 'next/link';
 import {
   Briefcase,
   Sparkles,
@@ -20,6 +21,7 @@ import {
   CheckCircle2,
   Loader2,
   ArrowRight,
+  AlertTriangle,
 } from 'lucide-react';
 
 export default function WorkerSignupPage() {
@@ -36,6 +38,12 @@ export default function WorkerSignupPage() {
   const [rateAmount, setRateAmount] = useState(1000);
   const [cnicNumber, setCnicNumber] = useState('');
   const [bio, setBio] = useState('');
+
+  // Agreement & Security states
+  const [agreedTerms, setAgreedTerms] = useState(false);
+  const [agreedCommission, setAgreedCommission] = useState(false);
+  const [isCaptchaValid, setIsCaptchaValid] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   // Mock file upload states
   const [profilePhotoUrl, setProfilePhotoUrl] = useState(
@@ -77,8 +85,31 @@ export default function WorkerSignupPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage('');
+
     if (!name || !phone || !cnicNumber || !area) return;
 
+    if (!agreedTerms) {
+      setErrorMessage('Baraye meherbani Terms & Conditions aur Privacy Policy ko qabool karein.');
+      return;
+    }
+
+    if (!agreedCommission) {
+      setErrorMessage('Baraye meherbani 15% platform commission aur suspension policy ko qabool karein.');
+      return;
+    }
+
+    if (!isCaptchaValid) {
+      setErrorMessage('Security verification (Bot check) ka sahi jawab likhein.');
+      return;
+    }
+
+    if (!checkDeviceSignupRateLimit()) {
+      setErrorMessage('Is device se zyada worker accounts create karne ki limit poori ho chuki hai. Baad mein koshish karein.');
+      return;
+    }
+
+    recordDeviceSignup();
     setIsSubmitting(true);
 
     setTimeout(() => {
@@ -375,10 +406,57 @@ export default function WorkerSignupPage() {
               />
             </div>
 
+            {/* Security Verification & Agreements */}
+            <div className="space-y-4 pt-4 border-t border-[#EAECE7]">
+              <CaptchaChallenge onVerify={(isValid) => setIsCaptchaValid(isValid)} />
+
+              <div className="space-y-2.5">
+                <div className="flex items-start gap-2">
+                  <input
+                    type="checkbox"
+                    id="worker-terms"
+                    checked={agreedTerms}
+                    onChange={(e) => setAgreedTerms(e.target.checked)}
+                    className="mt-0.5 rounded border-[#EAECE7] text-[#0B0E12] focus:ring-0 cursor-pointer"
+                  />
+                  <label htmlFor="worker-terms" className="text-xs text-[#666E7A] font-medium leading-tight cursor-pointer">
+                    I agree to the{' '}
+                    <Link href="/terms" target="_blank" className="text-[#0B0E12] font-bold underline hover:text-[#1FB863]">
+                      Terms & Conditions
+                    </Link>{' '}
+                    and{' '}
+                    <Link href="/privacy" target="_blank" className="text-[#0B0E12] font-bold underline hover:text-[#1FB863]">
+                      Privacy Policy
+                    </Link>
+                  </label>
+                </div>
+
+                <div className="flex items-start gap-2">
+                  <input
+                    type="checkbox"
+                    id="worker-commission"
+                    checked={agreedCommission}
+                    onChange={(e) => setAgreedCommission(e.target.checked)}
+                    className="mt-0.5 rounded border-[#EAECE7] text-[#0B0E12] focus:ring-0 cursor-pointer"
+                  />
+                  <label htmlFor="worker-commission" className="text-xs text-[#666E7A] font-medium leading-tight cursor-pointer">
+                    I agree to the <strong>15% platform commission</strong> and understand that sharing contact details outside the app may result in account suspension.
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            {errorMessage && (
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl flex items-center gap-2 text-rose-700 text-xs font-semibold">
+                <AlertTriangle size={16} className="shrink-0" />
+                <span>{errorMessage}</span>
+              </div>
+            )}
+
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="btn btn-lime w-full py-4 text-xs font-extrabold"
+              disabled={isSubmitting || !agreedTerms || !agreedCommission || !isCaptchaValid}
+              className="btn btn-lime w-full py-4 text-xs font-extrabold disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? 'Registering Provider...' : 'Submit Provider Registration'}
               <ArrowRight size={18} />

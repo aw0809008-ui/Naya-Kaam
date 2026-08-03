@@ -36,6 +36,7 @@ export interface Worker {
   is_suspended?: boolean;
   average_rating: number;
   total_reviews: number;
+  completed_jobs?: number;
   created_at: string;
 }
 
@@ -46,7 +47,7 @@ export interface Category {
   description: string;
 }
 
-export type BookingStatus = 'pending' | 'accepted' | 'completed' | 'cancelled';
+export type BookingStatus = 'pending' | 'accepted' | 'declined' | 'completed' | 'cancelled';
 export type CommissionStatus = 'pending' | 'paid';
 export type TimePreference = 'Morning (9am - 12pm)' | 'Afternoon (12pm - 4pm)' | 'Evening (4pm - 8pm)';
 
@@ -128,14 +129,20 @@ export interface ChatMessage {
 export interface DisputeReport {
   id: string;
   booking_id: string;
-  reporter_id: string;
-  reporter_name: string;
-  reporter_role: 'customer' | 'worker';
-  reported_user_id: string;
-  reported_user_name: string;
-  issue_category: 'overcharging' | 'poor_quality' | 'no_show' | 'unprofessional' | 'other';
-  reason: string;
-  status: 'open' | 'investigating' | 'resolved' | 'dismissed';
+  reporter_id?: string;
+  reporter_name?: string;
+  reporter_role?: 'customer' | 'worker';
+  reported_user_id?: string;
+  reported_user_name?: string;
+  complainant_id?: string;
+  complainant_role?: 'customer' | 'worker';
+  target_worker_id?: string;
+  issue_category: string;
+  description?: string;
+  reason?: string;
+  evidence_photo_url?: string;
+  status: 'open' | 'under_review' | 'investigating' | 'resolved' | 'dismissed' | 'resolved_refunded' | 'resolved_no_action' | 'resolved_worker_warned';
   created_at: string;
+  resolved_at?: string;
   resolution_notes?: string;
 }

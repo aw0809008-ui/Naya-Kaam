@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { Worker, TimePreference } from '@/lib/types';
-import { createBooking, getCurrentUser } from '@/lib/store';
-import { X, Calendar, Clock, MapPin, CheckCircle2, Phone, User, FileText, ArrowRight } from 'lucide-react';
+import { createBooking, getCurrentUser, checkCustomerBookingRateLimit } from '@/lib/store';
+import { X, Calendar, Clock, MapPin, CheckCircle2, Phone, User, FileText, ArrowRight, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -12,9 +12,10 @@ interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
   onBookingSuccess?: () => void;
+  onBookingCreated?: () => void;
 }
 
-export function BookingModal({ worker, isOpen, onClose, onBookingSuccess }: BookingModalProps) {
+export function BookingModal({ worker, isOpen, onClose, onBookingSuccess, onBookingCreated }: BookingModalProps) {
   const currentUser = getCurrentUser();
 
   const [fullName, setFullName] = useState(currentUser?.name || '');
@@ -28,12 +29,22 @@ export function BookingModal({ worker, isOpen, onClose, onBookingSuccess }: Book
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [createdBookingId, setCreatedBookingId] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   if (!isOpen || !worker) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage('');
     if (!fullName || !phone || !address || !description) return;
+
+    const customerId = currentUser?.id || 'guest';
+    const rateCheck = checkCustomerBookingRateLimit(customerId);
+
+    if (!rateCheck.allowed) {
+      setErrorMessage('Aap aaj 5 bookings ki rozana limit poori kar chuke hain. Spam se bachao k liye rozana max 5 bookings ki ijazat hai.');
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -58,6 +69,7 @@ export function BookingModal({ worker, isOpen, onClose, onBookingSuccess }: Book
       setIsSubmitting(false);
       setIsConfirmed(true);
       if (onBookingSuccess) onBookingSuccess();
+      if (onBookingCreated) onBookingCreated();
     }, 600);
   };
 
@@ -99,6 +111,13 @@ export function BookingModal({ worker, isOpen, onClose, onBookingSuccess }: Book
                 </p>
               </div>
             </div>
+
+            {errorMessage && (
+              <div className="p-3 mb-4 bg-rose-50 border border-rose-200 rounded-xl flex items-center gap-2 text-rose-700 text-xs font-semibold">
+                <AlertTriangle size={16} className="shrink-0" />
+                <span>{errorMessage}</span>
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>

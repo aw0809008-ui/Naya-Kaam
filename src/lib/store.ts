@@ -195,6 +195,13 @@ export function getWorkerBookings(workerId: string): Booking[] {
   return bookings.filter((b) => b.worker_id === workerId);
 }
 
+import {
+  notifyNewBookingRequest,
+  notifyBookingStatusChanged,
+  notifyBookingCompleted,
+  sendAppNotification,
+} from './notifications';
+
 export function createBooking(data: Omit<Booking, 'id' | 'created_at' | 'status' | 'commission_amount' | 'commission_status'>): Booking {
   const bookings = getBookings();
   const commission = Math.round((data.booking_amount || 1000) * 0.1);
@@ -213,6 +220,9 @@ export function createBooking(data: Omit<Booking, 'id' | 'created_at' | 'status'
   setDoc(doc(db, 'bookings', newBooking.id), newBooking).catch((err) => {
     handleFirestoreError(err, OperationType.CREATE, `bookings/${newBooking.id}`);
   });
+
+  // Trigger Push / App Notification to worker
+  notifyNewBookingRequest(newBooking.worker_id, newBooking.customer_name, newBooking.category, newBooking.id).catch(() => {});
 
   return newBooking;
 }
@@ -238,6 +248,12 @@ export function updateBookingStatus(bookingId: string, status: BookingStatus): B
     setDoc(doc(db, 'bookings', bookingId), updatedBooking).catch((err) => {
       handleFirestoreError(err, OperationType.UPDATE, `bookings/${bookingId}`);
     });
+
+    if (status === 'accepted' || status === 'declined' || status === 'cancelled') {
+      notifyBookingStatusChanged(updatedBooking.customer_id, updatedBooking.worker_name, status, bookingId).catch(() => {});
+    } else if (status === 'completed') {
+      notifyBookingCompleted(updatedBooking.customer_id, updatedBooking.worker_name, bookingId).catch(() => {});
+    }
 
     // If job was completed, update worker's completed_jobs stat
     if (status === 'completed' && targetBooking?.worker_id) {
@@ -394,6 +410,8 @@ export function getBookingChatMessages(bookingId: string): ChatMessage[] {
   return msgs.filter((m) => m.booking_id === bookingId).sort((a, b) => a.created_at.localeCompare(b.created_at));
 }
 
+import { notifyNewChatMessage } from './notifications';
+
 export function sendChatMessage(msgData: Omit<ChatMessage, 'id' | 'created_at'>): ChatMessage {
   const msgs = getChatMessages();
   const newMsg: ChatMessage = {
@@ -408,7 +426,25 @@ export function sendChatMessage(msgData: Omit<ChatMessage, 'id' | 'created_at'>)
     handleFirestoreError(err, OperationType.CREATE, `chats/${newMsg.id}`);
   });
 
+  // Find booking to determine recipient
+  const bookings = getBookings();
+  const booking = bookings.find((b) => b.id === msgData.booking_id);
+  if (booking) {
+    const recipientId = msgData.sender_role === 'customer' ? booking.worker_id : booking.customer_id;
+    notifyNewChatMessage(recipientId, msgData.sender_name, msgData.text, msgData.booking_id).catch(() => {});
+  }
+
   return newMsg;
+}
+
+export function recordMissedCallChatMessage(bookingId: string, callerName: string, senderRole: 'customer' | 'worker'): ChatMessage {
+  return sendChatMessage({
+    booking_id: bookingId,
+    sender_id: 'system',
+    sender_name: callerName,
+    sender_role: senderRole,
+    text: `📞 Missed In-App Voice Call from ${callerName}`,
+  });
 }
 
 // --- FAVORITE WORKERS ---
@@ -429,6 +465,45 @@ export function getDisputeReports(): DisputeReport[] {
   return getStored<DisputeReport[]>(STORAGE_KEYS.DISPUTES, []);
 }
 
+// --- RATE LIMITING & ABUSE PREVENTION ---
+export function checkCustomerBookingRateLimit(customerId: string): { allowed: boolean; remaining: number } {
+  const bookings = getBookings();
+  const todayStr = new Date().toISOString().split('T')[0];
+  const todayCount = bookings.filter(
+    (b) => b.customer_id === customerId && b.created_at.startsWith(todayStr)
+  ).length;
+
+  return {
+    allowed: todayCount < 5,
+    remaining: Math.max(0, 5 - todayCount),
+  };
+}
+
+export function checkDeviceSignupRateLimit(): boolean {
+  if (typeof window === 'undefined') return true;
+  try {
+    const raw = localStorage.getItem('nayakaam_signup_timestamps');
+    const timestamps: number[] = raw ? JSON.parse(raw) : [];
+    const oneHourAgo = Date.now() - 3600 * 1000;
+    const recentSignups = timestamps.filter((t) => t > oneHourAgo);
+    return recentSignups.length < 3;
+  } catch {
+    return true;
+  }
+}
+
+export function recordDeviceSignup(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const raw = localStorage.getItem('nayakaam_signup_timestamps');
+    const timestamps: number[] = raw ? JSON.parse(raw) : [];
+    const oneHourAgo = Date.now() - 3600 * 1000;
+    const recentSignups = timestamps.filter((t) => t > oneHourAgo);
+    recentSignups.push(Date.now());
+    localStorage.setItem('nayakaam_signup_timestamps', JSON.stringify(recentSignups));
+  } catch {}
+}
+
 export function createDisputeReport(data: Omit<DisputeReport, 'id' | 'created_at' | 'status'>): DisputeReport {
   const reports = getDisputeReports();
   const newReport: DisputeReport = {
@@ -445,6 +520,50 @@ export function createDisputeReport(data: Omit<DisputeReport, 'id' | 'created_at
   });
 
   return newReport;
+}
+
+export function resolveDisputeReport(
+  disputeId: string,
+  newStatus: 'resolved_refunded' | 'resolved_no_action' | 'resolved_worker_warned',
+  adminNote?: string
+): DisputeReport[] {
+  const reports = getDisputeReports();
+  let targetDispute: DisputeReport | undefined;
+
+  const updated = reports.map((r) => {
+    if (r.id === disputeId) {
+      targetDispute = { ...r, status: newStatus, resolution_notes: adminNote, resolved_at: new Date().toISOString() };
+      return targetDispute;
+    }
+    return r;
+  });
+
+  setStored(STORAGE_KEYS.DISPUTES, updated);
+
+  if (targetDispute) {
+    setDoc(doc(db, 'disputes', disputeId), targetDispute).catch((err) => {
+      handleFirestoreError(err, OperationType.UPDATE, `disputes/${disputeId}`);
+    });
+
+    // Notify complainant and target worker
+    const statusLabel =
+      newStatus === 'resolved_refunded'
+        ? 'Resolved — Refunded / Compensated'
+        : newStatus === 'resolved_worker_warned'
+        ? 'Resolved — Worker Warned'
+        : 'Resolved — Case Closed';
+
+    sendAppNotification({
+      recipientId: targetDispute.complainant_id,
+      title: `⚖️ Dispute ${statusLabel}`,
+      body: `Admin ne aapki dispute report par decision le liya hai: ${adminNote || 'No notes provided.'}`,
+      type: 'booking_status',
+      url: '/dashboard?tab=bookings',
+      meta: { bookingId: targetDispute.booking_id },
+    }).catch(() => {});
+  }
+
+  return updated;
 }
 
 

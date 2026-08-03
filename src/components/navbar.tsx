@@ -15,15 +15,37 @@ import {
   ChevronDown,
   Sparkles,
   Briefcase,
+  Bell,
+  CheckCircle2,
 } from 'lucide-react';
 import { getCurrentUser, setCurrentUser } from '@/lib/store';
 import { User as UserType } from '@/lib/types';
+import { getStoredNotifications, AppNotification } from '@/lib/notifications';
 
 export function Navbar() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [currentUser, setUserState] = useState<UserType | null>(() => getCurrentUser());
   const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notifications, setNotifications] = useState<AppNotification[]>(() => {
+    const u = getCurrentUser();
+    return u?.id ? getStoredNotifications(u.id) : [];
+  });
+
+  useEffect(() => {
+    const handleNewNotif = () => {
+      const u = getCurrentUser();
+      if (u?.id) {
+        setNotifications(getStoredNotifications(u.id));
+      }
+    };
+
+    window.addEventListener('nayakaam_new_notification', handleNewNotif);
+    return () => window.removeEventListener('nayakaam_new_notification', handleNewNotif);
+  }, []);
+
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
 
   const handleSwitchRole = (role: 'customer' | 'worker' | 'admin') => {
     setRoleDropdownOpen(false);
@@ -155,6 +177,61 @@ export function Navbar() {
 
             {currentUser ? (
               <div className="flex items-center gap-2">
+                {/* Notifications Bell */}
+                <div className="relative">
+                  <button
+                    onClick={() => setNotificationsOpen(!notificationsOpen)}
+                    className="p-2 text-[#0B0E12] hover:bg-gray-100 rounded-full transition relative"
+                    title="Notifications"
+                    aria-label="View notifications"
+                  >
+                    <Bell size={19} />
+                    {unreadCount > 0 && (
+                      <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center animate-pulse">
+                        {unreadCount}
+                      </span>
+                    )}
+                  </button>
+
+                  {notificationsOpen && (
+                    <div className="absolute right-0 mt-2 w-80 rounded-2xl bg-white shadow-2xl border border-[#EAECE7] p-3 z-50 text-xs space-y-2">
+                      <div className="flex items-center justify-between pb-2 border-b border-gray-100 font-bold text-[#0B0E12]">
+                        <span>Notifications</span>
+                        <span className="text-[10px] bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full font-semibold">
+                          {notifications.length} Total
+                        </span>
+                      </div>
+
+                      <div className="max-h-72 overflow-y-auto space-y-2">
+                        {notifications.length === 0 ? (
+                          <div className="text-center py-6 text-gray-400 font-medium text-xs">
+                            No notifications yet
+                          </div>
+                        ) : (
+                          notifications.map((notif) => (
+                            <Link
+                              key={notif.id}
+                              href={notif.url}
+                              onClick={() => setNotificationsOpen(false)}
+                              className="block p-2.5 rounded-xl bg-gray-50 hover:bg-emerald-50/50 border border-gray-100 transition space-y-1"
+                            >
+                              <div className="font-bold text-[#0B0E12] text-xs flex items-center justify-between">
+                                <span className="truncate">{notif.title}</span>
+                                <span className="text-[9px] text-gray-400 font-normal shrink-0">
+                                  {new Date(notif.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                              </div>
+                              <p className="text-gray-600 text-[11px] leading-snug line-clamp-2">
+                                {notif.body}
+                              </p>
+                            </Link>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 <Link
                   href={currentUser.role === 'admin' ? '/admin' : '/dashboard'}
                   className="btn btn-primary text-xs py-2 px-4"
