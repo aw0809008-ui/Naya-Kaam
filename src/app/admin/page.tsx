@@ -167,7 +167,7 @@ export default function AdminPage() {
             </div>
             <h1 className="text-2xl sm:text-3xl font-heading font-bold tracking-tight">Naya Kaam Control Center</h1>
             <p className="text-xs text-blue-100 mt-1 font-body">
-              NADRA CNIC verification, provider approval, and 10% commission revenue ledger
+              NADRA CNIC verification, provider approval, and 15% commission revenue ledger
             </p>
           </div>
 
@@ -247,7 +247,7 @@ export default function AdminPage() {
             <span className="text-2xl font-heading font-extrabold text-purple-700 block">
               Rs. {totalPlatformRevenue.toLocaleString()}
             </span>
-            <span className="text-[11px] text-[#6B7280] font-body">10% commission earnings</span>
+            <span className="text-[11px] text-[#6B7280] font-body">15% commission earnings</span>
           </div>
         </div>
 
@@ -517,7 +517,7 @@ export default function AdminPage() {
             <div className="p-5 border-b border-gray-100 flex items-center justify-between">
               <div>
                 <h3 className="font-bold text-base text-[#1A1A1A]">
-                  Platform Commission Revenue (10%)
+                  Platform Commission Revenue (15%)
                 </h3>
                 <p className="text-xs text-gray-500">
                   Calculated automatically on every completed booking
@@ -538,7 +538,7 @@ export default function AdminPage() {
                     <th className="p-3.5">Booking ID</th>
                     <th className="p-3.5">Worker</th>
                     <th className="p-3.5">Total Job Price</th>
-                    <th className="p-3.5">10% Platform Cut</th>
+                    <th className="p-3.5">15% Platform Cut</th>
                     <th className="p-3.5">Worker Payout</th>
                     <th className="p-3.5">Status</th>
                   </tr>

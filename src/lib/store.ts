@@ -204,7 +204,7 @@ import {
 
 export function createBooking(data: Omit<Booking, 'id' | 'created_at' | 'status' | 'commission_amount' | 'commission_status'>): Booking {
   const bookings = getBookings();
-  const commission = Math.round((data.booking_amount || 1000) * 0.1);
+  const commission = Math.round((data.booking_amount || 1000) * 0.15);
   const newBooking: Booking = {
     ...data,
     id: `b-${Date.now()}`,
@@ -553,14 +553,18 @@ export function resolveDisputeReport(
         ? 'Resolved — Worker Warned'
         : 'Resolved — Case Closed';
 
-    sendAppNotification({
-      recipientId: targetDispute.complainant_id,
-      title: `⚖️ Dispute ${statusLabel}`,
-      body: `Admin ne aapki dispute report par decision le liya hai: ${adminNote || 'No notes provided.'}`,
-      type: 'booking_status',
-      url: '/dashboard?tab=bookings',
-      meta: { bookingId: targetDispute.booking_id },
-    }).catch(() => {});
+    const recipientId = targetDispute.complainant_id || targetDispute.reporter_id;
+
+    if (recipientId) {
+      sendAppNotification({
+        recipientId,
+        title: `⚖️ Dispute ${statusLabel}`,
+        body: `Admin ne aapki dispute report par decision le liya hai: ${adminNote || 'No notes provided.'}`,
+        type: 'booking_status',
+        url: '/dashboard?tab=bookings',
+        meta: { bookingId: targetDispute.booking_id },
+      }).catch(() => {});
+    }
   }
 
   return updated;

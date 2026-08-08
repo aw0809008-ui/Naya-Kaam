@@ -73,9 +73,26 @@ export default function DashboardPage() {
   const [selectedBookingForDispute, setSelectedBookingForDispute] = useState<Booking | null>(null);
   const [selectedWorkerForRepeat, setSelectedWorkerForRepeat] = useState<Worker | null>(null);
 
+  const getActiveWorkerId = (user: User | null) => {
+    if (!user) return 'w-1';
+    if (user.role === 'worker') {
+      const rawId = user.id.startsWith('u-') ? user.id.substring(2) : user.id;
+      return getWorkerById(rawId) ? rawId : 'w-1';
+    }
+    return 'w-1';
+  };
+
   // Worker state
-  const [workerObj, setWorkerObj] = useState<Worker | null>(() => getWorkerById('w-1') || null);
-  const [workerBookings, setWorkerBookings] = useState<Booking[]>(() => getWorkerBookings('w-1'));
+  const [workerObj, setWorkerObj] = useState<Worker | null>(() => {
+    const user = getCurrentUser();
+    const wId = getActiveWorkerId(user);
+    return getWorkerById(wId) || null;
+  });
+  const [workerBookings, setWorkerBookings] = useState<Booking[]>(() => {
+    const user = getCurrentUser();
+    const wId = getActiveWorkerId(user);
+    return getWorkerBookings(wId);
+  });
   const [workerTab, setWorkerTab] = useState<'requests' | 'my-jobs' | 'earnings' | 'profile'>('requests');
 
   // Edit worker profile form state
@@ -89,7 +106,7 @@ export default function DashboardPage() {
       const bks = getCustomerBookings(user?.id || 'u-c1');
       setCustomerBookings(bks);
     } else {
-      const wId = user?.role === 'worker' ? 'w-1' : 'w-1'; // Default worker for demo
+      const wId = getActiveWorkerId(user);
       const w = getWorkerById(wId);
       if (w) {
         setWorkerObj(w);
@@ -133,7 +150,7 @@ export default function DashboardPage() {
   const acceptedJobs = workerBookings.filter((b) => b.status === 'accepted');
   const completedJobs = workerBookings.filter((b) => b.status === 'completed');
   const totalEarnings = completedJobs.reduce((sum, b) => sum + b.booking_amount, 0);
-  const totalCommissionOwed = Math.round(totalEarnings * 0.1);
+  const totalCommissionOwed = Math.round(totalEarnings * 0.15);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F7F8FA] font-body">
@@ -466,7 +483,7 @@ export default function DashboardPage() {
 
               <div className="bg-white p-4 rounded-2xl border border-[#E5E7EB] shadow-xs text-center">
                 <span className="text-[11px] font-bold text-red-600 uppercase tracking-wider block font-heading">
-                  Commission (10%)
+                  Commission (15%)
                 </span>
                 <span className="text-lg font-heading font-bold text-red-600 mt-1 block">
                   Rs. {totalCommissionOwed.toLocaleString()}
@@ -711,7 +728,7 @@ export default function DashboardPage() {
                   <h3 className="font-heading font-bold text-base text-[#1A1A1A]">
                     Completed Jobs & Commission Ledger
                   </h3>
-                  <span className="text-xs text-[#6B7280] font-body">Commission rate: 10% per booking</span>
+                  <span className="text-xs text-[#6B7280] font-body">Commission rate: 15% per booking</span>
                 </div>
 
                 <div className="overflow-x-auto">
@@ -722,7 +739,7 @@ export default function DashboardPage() {
                         <th className="p-4">Customer</th>
                         <th className="p-4">Date</th>
                         <th className="p-4">Total Amount</th>
-                        <th className="p-4">Commission (10%)</th>
+                        <th className="p-4">Commission (15%)</th>
                         <th className="p-4">Net Earning</th>
                         <th className="p-4">Commission Status</th>
                       </tr>
