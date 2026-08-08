@@ -89,6 +89,28 @@ export default function AdminPage() {
     setSelectedCnicWorker(null);
   };
 
+  const exportBookingsCSV = () => {
+    const headers = ['Booking ID', 'Customer Name', 'Worker Name', 'Category', 'Date Needed', 'Amount (PKR)', 'Commission (PKR)', 'Status'];
+    const rows = bookings.map((b) => [
+      b.id,
+      `"${b.customer_name}"`,
+      `"${b.worker_name}"`,
+      `"${b.category}"`,
+      b.date_needed,
+      b.booking_amount,
+      b.commission_amount,
+      b.status,
+    ]);
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `nayakaam_bookings_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   // Stats
   const pendingVerifications = workers.filter((w) => !w.is_verified);
   const totalVerified = workers.filter((w) => w.is_verified).length;
@@ -172,6 +194,13 @@ export default function AdminPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={exportBookingsCSV}
+              className="px-3.5 py-2 rounded-[10px] bg-amber-500 hover:bg-amber-600 text-xs font-bold text-[#0B0E12] transition flex items-center gap-1.5 shadow-md"
+            >
+              <DollarSign size={14} />
+              <span>Export CSV</span>
+            </button>
             <Link
               href="/admin/health-check"
               className="px-3.5 py-2 rounded-[10px] bg-[#39E07A] hover:bg-[#2fc468] text-xs font-bold text-[#0B0E12] transition flex items-center gap-1.5 shadow-md"

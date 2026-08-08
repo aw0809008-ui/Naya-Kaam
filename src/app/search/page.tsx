@@ -148,32 +148,64 @@ function SearchContent() {
 
       {/* Top Banner & Quick Controls */}
       <div className="bg-white border-b border-[#EAECE7] py-8 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-[1200px] mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-heading font-extrabold text-[#0B0E12]">
-              Mahir Kaarigar Search (Skilled Workers)
-            </h1>
-            <p className="text-xs text-[#666E7A] mt-1 font-medium">
-              Showing {filteredWorkers.length} verified & rating-backed service providers across Pakistan
-            </p>
+        <div className="max-w-[1200px] mx-auto space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-heading font-extrabold text-[#0B0E12]">
+                Mahir Kaarigar Search (Skilled Workers)
+              </h1>
+              <p className="text-xs text-[#666E7A] mt-1 font-medium">
+                Showing {filteredWorkers.length} verified & rating-backed service providers across Pakistan
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setIsSmartSearchOpen(true)}
+                className="btn btn-lime text-xs py-2 px-3.5 font-bold"
+              >
+                <Sparkles size={15} />
+                <span>AI Smart Search</span>
+              </button>
+
+              <button
+                onClick={() => setMobileFilterOpen(true)}
+                className="lg:hidden btn btn-secondary text-xs py-2 px-3.5 font-bold"
+              >
+                <SlidersHorizontal size={15} />
+                <span>Filters</span>
+              </button>
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          {/* Quick Category Pills */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
             <button
-              onClick={() => setIsSmartSearchOpen(true)}
-              className="btn btn-lime text-xs py-2 px-3.5 font-bold"
+              onClick={() => setSelectedCategories([])}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-bold shrink-0 transition ${
+                selectedCategories.length === 0
+                  ? 'bg-[#0B0E12] text-[#39E07A]'
+                  : 'bg-[#F7F8F5] text-[#0B0E12] border border-[#EAECE7] hover:bg-gray-100'
+              }`}
             >
-              <Sparkles size={15} />
-              <span>AI Smart Search</span>
+              All Trades ({workers.length})
             </button>
-
-            <button
-              onClick={() => setMobileFilterOpen(true)}
-              className="lg:hidden btn btn-secondary text-xs py-2 px-3.5 font-bold"
-            >
-              <SlidersHorizontal size={15} />
-              <span>Filters</span>
-            </button>
+            {categories.map((cat) => {
+              const isSelected = selectedCategories.includes(cat.name);
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => handleCategoryToggle(cat.name)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-bold shrink-0 transition flex items-center gap-1.5 border ${
+                    isSelected
+                      ? 'bg-[#0B0E12] text-[#39E07A] border-[#0B0E12]'
+                      : 'bg-[#F7F8F5] text-[#0B0E12] border-[#EAECE7] hover:bg-gray-100'
+                  }`}
+                >
+                  <span>{cat.name}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>

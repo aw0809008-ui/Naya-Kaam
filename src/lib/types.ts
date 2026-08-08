@@ -65,6 +65,8 @@ export interface Booking {
   time_preference: TimePreference;
   address: string;
   description: string;
+  photo_attachment_url?: string;
+  is_urgent?: boolean;
   status: BookingStatus;
   booking_amount: number;
   commission_amount: number;
