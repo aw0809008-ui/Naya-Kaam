@@ -12,6 +12,7 @@ import { BookingModal } from '@/components/booking-modal';
 import { useCall } from '@/components/call/call-provider';
 import { VerifiedBadge } from '@/components/verified-badge';
 import { StarRating } from '@/components/star-rating';
+import { WorkerCard } from '@/components/worker-card';
 import {
   getCurrentUser,
   setCurrentUser,
@@ -23,6 +24,7 @@ import {
   updateBookingStatus,
   initializeStore,
   getWorkers,
+  getFavoriteWorkerIds,
 } from '@/lib/store';
 import { User, Booking, Worker, BookingStatus } from '@/lib/types';
 import {
@@ -68,7 +70,7 @@ export default function DashboardPage() {
     const user = getCurrentUser();
     return getCustomerBookings(user?.id || 'u-c1');
   });
-  const [customerTab, setCustomerTab] = useState<'active' | 'completed' | 'cancelled'>('active');
+  const [customerTab, setCustomerTab] = useState<'active' | 'completed' | 'cancelled' | 'favorites'>('active');
   const [selectedBookingForReview, setSelectedBookingForReview] = useState<Booking | null>(null);
   const [selectedBookingForDispute, setSelectedBookingForDispute] = useState<Booking | null>(null);
   const [selectedWorkerForRepeat, setSelectedWorkerForRepeat] = useState<Worker | null>(null);
@@ -204,10 +206,10 @@ export default function DashboardPage() {
         {activeViewRole === 'customer' && (
           <div className="space-y-6">
             {/* Tabs Header */}
-            <div className="flex border-b border-[#E5E7EB] space-x-6 text-xs font-heading font-bold">
+            <div className="flex border-b border-[#E5E7EB] space-x-6 text-xs font-heading font-bold overflow-x-auto">
               <button
                 onClick={() => setCustomerTab('active')}
-                className={`pb-3 border-b-2 transition ${
+                className={`pb-3 border-b-2 transition whitespace-nowrap ${
                   customerTab === 'active'
                     ? 'border-[#1E5AA8] text-[#1E5AA8]'
                     : 'border-transparent text-[#6B7280] hover:text-[#1A1A1A]'
@@ -217,7 +219,7 @@ export default function DashboardPage() {
               </button>
               <button
                 onClick={() => setCustomerTab('completed')}
-                className={`pb-3 border-b-2 transition ${
+                className={`pb-3 border-b-2 transition whitespace-nowrap ${
                   customerTab === 'completed'
                     ? 'border-[#1E5AA8] text-[#1E5AA8]'
                     : 'border-transparent text-[#6B7280] hover:text-[#1A1A1A]'
@@ -227,7 +229,7 @@ export default function DashboardPage() {
               </button>
               <button
                 onClick={() => setCustomerTab('cancelled')}
-                className={`pb-3 border-b-2 transition ${
+                className={`pb-3 border-b-2 transition whitespace-nowrap ${
                   customerTab === 'cancelled'
                     ? 'border-[#1E5AA8] text-[#1E5AA8]'
                     : 'border-transparent text-[#6B7280] hover:text-[#1A1A1A]'
@@ -235,10 +237,55 @@ export default function DashboardPage() {
               >
                 Cancelled ({customerBookings.filter((b) => b.status === 'cancelled').length})
               </button>
+              <button
+                onClick={() => setCustomerTab('favorites')}
+                className={`pb-3 border-b-2 transition whitespace-nowrap ${
+                  customerTab === 'favorites'
+                    ? 'border-[#1E5AA8] text-[#1E5AA8]'
+                    : 'border-transparent text-[#6B7280] hover:text-[#1A1A1A]'
+                }`}
+              >
+                Saved Kaarigars ({getFavoriteWorkerIds().length})
+              </button>
             </div>
 
-            {/* Bookings List */}
+            {/* Bookings & Favorites List */}
             {(() => {
+              if (customerTab === 'favorites') {
+                const favIds = getFavoriteWorkerIds();
+                const favWorkers = getWorkers().filter((w) => favIds.includes(w.id));
+
+                if (favWorkers.length === 0) {
+                  return (
+                    <div className="bg-white rounded-2xl p-12 text-center border border-[#E5E7EB] shadow-xs space-y-3 max-w-md mx-auto my-8">
+                      <Star size={36} className="text-gray-300 mx-auto" />
+                      <h3 className="text-base font-heading font-bold text-[#1A1A1A]">No Saved Kaarigars Yet</h3>
+                      <p className="text-xs text-[#6B7280] font-body">
+                        Workers ke card par Heart ❤️ icon tap karke apne pasandida kaarigar save karein.
+                      </p>
+                      <Link
+                        href="/search"
+                        className="inline-block px-5 py-2.5 bg-[#1FB863] text-white rounded-[10px] text-xs font-bold transition hover:bg-[#189d53]"
+                      >
+                        Explore Kaarigars
+                      </Link>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {favWorkers.map((worker) => (
+                      <WorkerCard
+                        key={worker.id}
+                        worker={worker}
+                        onBookClick={(w) => setSelectedWorkerForRepeat(w)}
+                      />
+                    ))}
+                  </div>
+                );
+              }
+
               const filtered = customerBookings.filter((b) => {
                 if (customerTab === 'active') return b.status === 'pending' || b.status === 'accepted';
                 if (customerTab === 'completed') return b.status === 'completed';
