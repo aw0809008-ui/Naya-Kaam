@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
 import { getDisputeReports, resolveDisputeReport, getBookings, getBookingChatMessages } from '@/lib/store';
@@ -206,7 +207,7 @@ export default function AdminDisputesPage() {
                       Reported by {(dispute.complainant_role || dispute.reporter_role || 'user').toUpperCase()}
                     </h3>
                     <p className="text-xs text-[#666E7A] line-clamp-3 mt-1 font-medium bg-[#F7F8F5] p-2.5 rounded-xl border border-[#EAECE7]">
-                      "{dispute.description}"
+                      &ldquo;{dispute.description}&rdquo;
                     </p>
                   </div>
                 </div>
@@ -256,16 +257,19 @@ export default function AdminDisputesPage() {
             <div className="bg-rose-50/50 border border-rose-100 p-4 rounded-2xl space-y-1.5">
               <span className="text-xs font-bold text-rose-800 block">Complainant Statement:</span>
               <p className="text-xs text-[#0B0E12] font-medium leading-relaxed">
-                "{selectedDispute.description}"
+                &ldquo;{selectedDispute.description}&rdquo;
               </p>
               {selectedDispute.evidence_photo_url && (
                 <div className="pt-2">
                   <span className="text-[11px] font-bold text-rose-800 block mb-1">Uploaded Evidence Photo:</span>
-                  <img
-                    src={selectedDispute.evidence_photo_url}
-                    alt="Evidence"
-                    className="h-32 w-full object-cover rounded-xl border border-rose-200"
-                  />
+                  <div className="relative h-32 w-full rounded-xl overflow-hidden border border-rose-200">
+                    <Image
+                      src={selectedDispute.evidence_photo_url}
+                      alt="Evidence"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
                 </div>
               )}
             </div>

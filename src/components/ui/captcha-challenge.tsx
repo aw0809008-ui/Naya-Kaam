@@ -8,8 +8,8 @@ interface CaptchaProps {
 }
 
 export function CaptchaChallenge({ onVerify }: CaptchaProps) {
-  const [num1, setNum1] = useState(0);
-  const [num2, setNum2] = useState(0);
+  const [num1, setNum1] = useState(() => Math.floor(Math.random() * 8) + 1);
+  const [num2, setNum2] = useState(() => Math.floor(Math.random() * 8) + 1);
   const [userAnswer, setUserAnswer] = useState('');
   const [isVerified, setIsVerified] = useState(false);
 
@@ -22,10 +22,6 @@ export function CaptchaChallenge({ onVerify }: CaptchaProps) {
     setIsVerified(false);
     onVerify(false);
   };
-
-  useEffect(() => {
-    generatePuzzle();
-  }, []);
 
   const handleChange = (val: string) => {
     setUserAnswer(val);

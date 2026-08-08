@@ -144,7 +144,10 @@ export default function AdminHealthCheckPage() {
 
   useEffect(() => {
     if (isAdminAuthenticated) {
-      runAutomatedDiagnostics();
+      const timer = setTimeout(() => {
+        runAutomatedDiagnostics();
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [isAdminAuthenticated]);
 
