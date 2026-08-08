@@ -52,8 +52,8 @@ export function Footer() {
               Legal
             </h4>
             <div className="flex flex-col gap-2 text-sm font-medium text-[#666E7A]">
-              <Link href="#" className="hover:text-[#0B0E12] transition">Terms</Link>
-              <Link href="#" className="hover:text-[#0B0E12] transition">Privacy</Link>
+              <Link href="/terms" className="hover:text-[#0B0E12] transition">Terms</Link>
+              <Link href="/privacy" className="hover:text-[#0B0E12] transition">Privacy</Link>
               <Link href="/admin" className="text-[#1FB863] font-bold hover:underline transition">Admin Portal</Link>
             </div>
           </div>

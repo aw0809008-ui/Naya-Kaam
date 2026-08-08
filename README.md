@@ -1,142 +1,127 @@
-# Eravauly Vintage 👕✨
+# Naya Kaam (نیا کام) 🇵🇰🛠️
 
-A beautiful, mobile-first **Vintage Clothing Inventory Management System** designed for Fleek sellers. Track your sourcing, listings, sales, and profits with a modern PWA that works offline!
+A modern, mobile-first **Skilled Worker Marketplace** in Pakistan that connects households and businesses with verified local kaarigars (Electricians, Plumbers, AC Technicians, Tailors, Tutors, Carpenters, Painters, Drivers, Makeup Artists, and more).
 
-![Eravauly Vintage](https://img.shields.io/badge/Eravauly-Vintage-amber)
+![Naya Kaam](https://img.shields.io/badge/Naya-Kaam-39E07A)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38BDF8)
 ![PWA Ready](https://img.shields.io/badge/PWA-Ready-green)
-
-## ✨ Features
-
-### 📱 Mobile-First PWA
-- **Installable** on iOS & Android as a native-like app
-- **Works offline** - data stored locally
-- **Responsive design** - perfect for checking inventory on the go
-
-### 📦 Inventory Management
-- Full CRUD operations for vintage items
-- Categories: Jeans, Polo Shirts, Hoodies, Jackets, Tees, Knits, Others
-- Status tracking: Sourced → Active on Fleek → Sold → Shipped
-- Condition grades: Deadstock, Excellent, Gently Used, Thrifted
-- Track sourcing costs, selling prices, and profit margins
-- Add Fleek listing links and notes
-
-### 📊 Dashboard & Analytics
-- Quick stats: Total Items, Active Listings, Total Sold, Investment, Revenue, Profit
-- Sales trend charts
-- Category breakdown visualization
-- Condition analysis
-- Recent activity feed
-
-### 🎨 Beautiful UI
-- Clean, modern design with warm amber/orange theme
-- Shadcn-inspired components
-- Smooth animations and transitions
-- Skeleton loading states
-- Mobile-optimized tables and cards
-
-## 🚀 Quick Start
-
-### Run Locally
-
-```bash
-# Clone the repo
-git clone https://github.com/YOUR_USERNAME/eravauly-vintage.git
-cd eravauly-vintage
-
-# Install dependencies
-npm install
-
-# Run development server
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-### Deploy to Vercel
-
-1. Push this repo to GitHub
-2. Go to [vercel.com](https://vercel.com)
-3. Import your GitHub repository
-4. Deploy! (no environment variables needed)
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new)
-
-## 📲 Install as App
-
-### iOS (iPhone/iPad)
-1. Open the app in Safari
-2. Tap the **Share** button (square with arrow)
-3. Scroll down and tap **"Add to Home Screen"**
-4. Tap **"Add"**
-
-### Android
-1. Open the app in Chrome
-2. Tap the **menu** (three dots)
-3. Tap **"Install app"** or **"Add to Home screen"**
-4. Follow the prompts
-
-## 📁 Project Structure
-
-```
-eravauly-vintage/
-├── public/
-│   ├── icons/           # PWA icons
-│   ├── manifest.json    # PWA manifest
-│   ├── sw.js           # Service worker
-│   └── offline.html    # Offline fallback
-├── src/
-│   ├── app/            # Next.js app router
-│   │   ├── (dashboard)/ # Protected dashboard routes
-│   │   ├── login/      # Login page
-│   │   └── signup/     # Signup page
-│   ├── components/     # React components
-│   │   ├── ui/         # Base UI components
-│   │   ├── dashboard/  # Dashboard components
-│   │   └── inventory/  # Inventory components
-│   └── lib/            # Utilities
-│       ├── local-storage.ts  # Data persistence
-│       └── utils.ts    # Helper functions
-```
-
-## 🗄️ Data Storage
-
-Currently uses **localStorage** for data persistence. This means:
-- ✅ Works completely offline
-- ✅ No backend setup required
-- ✅ Data stays on your device
-- ⚠️ Data is browser/device specific
-- ⚠️ Clearing browser data will delete inventory
-
-### Export Your Data
-Go to **Settings → Export to CSV** to download a backup of your inventory.
-
-## 🔧 Customization
-
-### Change Store Name
-Edit the branding in:
-- `src/components/dashboard/dashboard-shell.tsx`
-- `public/manifest.json`
-- `src/app/layout.tsx`
-
-### Add Categories
-Edit `src/components/inventory/item-form.tsx` and `src/app/(dashboard)/inventory/page.tsx`
-
-## 🛣️ Roadmap
-
-- [ ] Google Sheets sync for cloud backup
-- [ ] Multi-device sync
-- [ ] Photo uploads for items
-- [ ] Barcode/SKU scanning
-- [ ] Sales analytics by time period
-- [ ] Bulk import from CSV
-
-## 📄 License
-
-MIT License - feel free to use for your vintage business!
 
 ---
 
-Built with ❤️ for vintage sellers everywhere
+## ✨ Features
 
-**Eravauly Vintage** - *Track your vintage, grow your business*
+### 🔍 Skilled Worker Search & Smart Filters
+- **Filter by Trade/Category**: Electricians, Plumbers, AC Technicians, Tailors, Tutors, Carpenters, Painters, Drivers, Home Cooks, Mehndi Artists, and Makeup Artists.
+- **Location-Based Search**: Cities (Karachi, Lahore, Islamabad, Rawalpindi, Faisalabad) and neighborhood areas (Gulshan, DHA, F-8, Gulberg, etc.).
+- **Sorting & Range Filters**: Minimum rating threshold, price ceiling, verified-only toggle, and keyword search.
+
+### 🤖 AI-Powered Features (Gemini 2.5)
+- **AI Urdu/English Voice & Text Search Assistant**: Parses natural language requests (e.g., *"Gulshan mein urgent inverter AC repair walar dhoondo"*) into structured category, city, and area filters.
+- **AI Bio Generator for Kaarigars**: Automatically crafts professional, trustworthy bios in Roman Urdu/English for registering workers.
+- **AI Review Trust Summaries**: Synthesizes customer reviews into concise trust highlights for provider profiles.
+
+### 📱 In-App Calling & Real-Time Messaging (Privacy-First)
+- **WebRTC Voice Calling**: Call providers directly within the app without exchanging personal phone numbers.
+- **Booking Chat & Push Notifications**: In-app messaging per booking with FCM push notifications and system audio ringers.
+
+### 🛡️ Safety, NADRA CNIC Verification & Security
+- **NADRA CNIC Verification**: Workers upload front/back CNIC photos for admin verification before receiving public badges.
+- **Bot Defense & Anti-Abuse**: CAPTCHA challenges during registration, device rate-limiting (max 5 bookings/day, 3 signups/hr), and platform anti-circumvention protections.
+- **Dispute Resolution Console**: Formal complaint filing with evidence attachments and admin resolution workflow.
+
+### 💼 Worker & Admin Dashboards
+- **Dual View Role Switcher**: Seamlessly toggle between Customer and Worker view modes.
+- **Worker Management**: Job requests acceptance/decline, active job status, rate updates, availability toggle, and earnings report.
+- **Admin Control Center**: CNIC document verification queue, dispute resolution console, WebRTC call logs, platform revenue ledger (15% commission cut), and pre-launch health check diagnostic tool.
+
+### 📲 Mobile-First PWA (Progressive Web App)
+- **Installable** on iOS and Android devices as a native-like app.
+- **Offline Capable**: Offline fallback page, local cache persistence, and service worker push handler.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Framework**: [Next.js 16](https://nextjs.org/) (App Router, Turbopack)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) with Lucide React Icons
+- **AI Engine**: Google GenAI SDK (`@google/genai` / Gemini 2.5 Flash)
+- **Realtime & Cloud Data**: Firebase / Firestore & LocalStorage Sync Strategy
+- **Calling**: In-App WebRTC Pipeline with Custom Ringtone Audio Synthesis
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js (v18 or higher)
+- npm or yarn
+
+### Installation
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/aw0809008-ui/Naya-Kaam.git
+   cd Naya-Kaam
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+
+3. **Configure Environment Variables**:
+   Create a `.env.local` file in the root directory:
+   ```env
+   GEMINI_API_KEY=your_gemini_api_key_here
+   NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
+   ```
+
+4. **Run Development Server**:
+   ```bash
+   npm run dev
+   ```
+
+5. **Open in Browser**:
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+---
+
+## 📁 Directory Structure
+
+```
+Naya-Kaam/
+├── public/
+│   ├── icons/            # PWA icons (192x192, 512x512)
+│   ├── manifest.json     # Web app manifest
+│   ├── sw.js             # Service worker
+│   └── offline.html      # Offline fallback
+├── src/
+│   ├── app/              # Next.js App Router routes
+│   │   ├── (dashboard)/  # Protected customer/worker dashboards
+│   │   ├── admin/        # Admin portal, disputes, health-check, calls
+│   │   ├── api/ai/       # Gemini AI routes (bio, parse-search, summary)
+│   │   ├── book/         # Direct worker booking flow
+│   │   ├── worker/       # Worker public profile page
+│   │   ├── search/       # Service search and filter directory
+│   │   ├── worker-signup/# Kaarigar registration flow
+│   │   └── terms/privacy # Legal policy pages
+│   ├── components/       # Reusable React components & modals
+│   │   ├── call/         # WebRTC overlay & incoming call modal
+│   │   ├── ui/ font/     # UI primitives & CAPTCHA challenge
+│   │   └── ...
+│   └── lib/              # Utilities, store persistence, notifications, Firebase
+```
+
+---
+
+## 📄 License
+
+MIT License — feel free to adapt for local service marketplace projects.
+
+---
+
+**Naya Kaam** — *Connecting Pakistani households with trusted, verified kaarigars.* 🇵🇰✨

@@ -26,6 +26,8 @@ export function BookingModal({ worker, isOpen, onClose, onBookingSuccess, onBook
   );
   const [timePref, setTimePref] = useState<TimePreference>('Morning (9am - 12pm)');
   const [description, setDescription] = useState('');
+  const [isUrgent, setIsUrgent] = useState(false);
+  const [photoUrl, setPhotoUrl] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [createdBookingId, setCreatedBookingId] = useState('');
@@ -62,6 +64,8 @@ export function BookingModal({ worker, isOpen, onClose, onBookingSuccess, onBook
         time_preference: timePref,
         address: `${address}, ${worker.city}`,
         description,
+        is_urgent: isUrgent,
+        photo_attachment_url: photoUrl || undefined,
         booking_amount: worker.rate_amount,
       });
 
@@ -223,6 +227,34 @@ export function BookingModal({ worker, isOpen, onClose, onBookingSuccess, onBook
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Wazahat karein kya kaam karwana hai (e.g., UPS ki wiring set karni hai aur 2 fan dimmers change karne hain)"
                     className="w-full pl-10 pr-3 py-3 text-xs rounded-xl border border-[#EAECE7] focus:outline-none focus:border-[#0B0E12] text-[#0B0E12] bg-[#F7F8F5] font-medium"
+                  />
+                </div>
+              </div>
+
+              {/* Urgent Flag & Photo Attachment */}
+              <div className="p-3 bg-[#F7F8F5] rounded-xl border border-[#EAECE7] space-y-2.5">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isUrgent}
+                    onChange={(e) => setIsUrgent(e.target.checked)}
+                    className="w-4 h-4 rounded text-rose-600 focus:ring-rose-500"
+                  />
+                  <span className="text-xs font-bold text-[#0B0E12] flex items-center gap-1">
+                    🚨 Emergency Service Needed (Urgent request within 1-2 hours)
+                  </span>
+                </label>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-[#666E7A] mb-1">
+                    Attach Problem Photo URL (Optional)
+                  </label>
+                  <input
+                    type="url"
+                    value={photoUrl}
+                    onChange={(e) => setPhotoUrl(e.target.value)}
+                    placeholder="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=500"
+                    className="w-full p-2 text-[11px] rounded-lg border border-[#EAECE7] text-[#0B0E12] bg-white"
                   />
                 </div>
               </div>
